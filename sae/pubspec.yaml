@@ -1,5 +1,5 @@
 name: sae
-description: "A new Flutter project."
+description: "SAE mobile BUT2"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -39,7 +39,7 @@ dependencies:
   shared_preferences: ^2.2.2
   settings_ui: ^2.0.2
   provider: ^6.1.2
-
+  sqflite: ^2.0.0+4
 
 dev_dependencies:
   flutter_test:

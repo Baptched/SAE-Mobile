@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sae/UI/inscription.dart';
 import 'package:supabase/supabase.dart';
+import 'home.dart';
 
 class Connexion extends StatelessWidget {
   final SupabaseClient supabase;
@@ -83,7 +84,10 @@ class Connexion extends StatelessWidget {
                             content: Text('Connexion réussie'),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          // Naviguer vers la page suivante après la connexion réussie
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Home(supabase: supabase)),
+                          );
                         }
                       }
                     },

@@ -1,18 +1,16 @@
-// classe de produit inutile pour le moment. Ne pas utiliser
-
 class Produit {
   int? id;
   String label;
   String condition;
   int disponible;
-  String imageProduit;
+  String lienImageProduit;
 
   Produit({
     this.id,
     required this.label,
     required this.condition,
     required this.disponible,
-    required this.imageProduit,
+    required this.lienImageProduit,
   });
 
   Map<String, dynamic> toMap() {
@@ -21,7 +19,7 @@ class Produit {
       'labelP': label,
       'conditionP': condition,
       'disponible': disponible,
-      'imageProduit': imageProduit,
+      'lienImageProduit': lienImageProduit,
     };
   }
 
@@ -31,7 +29,7 @@ class Produit {
       label: map['labelP'],
       condition: map['conditionP'],
       disponible: map['disponible'],
-      imageProduit: map['imageProduit'],
+      lienImageProduit: map['lienImageProduit'],
     );
   }
 }

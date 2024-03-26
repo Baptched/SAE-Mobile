@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:supabase/supabase.dart';
+
+import '../models/utilisateur.dart';
 
 class Inscription extends StatelessWidget {
   final SupabaseClient supabase;
@@ -76,26 +79,24 @@ class Inscription extends StatelessWidget {
                   }
 
                   // Vérification de l'unicité du pseudo
-                  final responsePseudo = await supabase
-                      .from('utilisateur')
-                      .select()
-                      .eq('pseudo', pseudo);
+                  final Utilisateur? responsePseudo = await UtilisateurDB.getUtilisateurByPseudo(pseudo);
 
-                  if (responsePseudo.isNotEmpty) {
+                  if (responsePseudo != null) {
                     final snackBar = SnackBar(
                       content: Text('Pseudo déjà utilisé'),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     return;
                   }
+                  Utilisateur u = Utilisateur(
+                    id: 0,
+                    prenom: prenom,
+                    nom: nom,
+                    pseudo: pseudo,
+                    motDePasse: motDePasse,
+                  );
 
-                  // Insérer l'utilisateur dans la base de données
-                  final response = await supabase.from('utilisateur').insert({
-                    'prenomu': prenom,
-                    'nomu': nom,
-                    'pseudo': pseudo,
-                    'motdepasse': motDePasse,
-                  });
+                  await UtilisateurDB.insererUtilisateur(u);
 
                   // Retour à la page de connexion
                   Navigator.pop(context);

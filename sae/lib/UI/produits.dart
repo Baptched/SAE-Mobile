@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sae/database/database.dart';
+import 'package:sae/database/sqflite/database.dart';
 import 'package:sae/models/Produit.dart';
 import 'package:sqflite/sqflite.dart';
 

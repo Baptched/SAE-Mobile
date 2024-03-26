@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sae/UI/inscription.dart';
+import 'package:sae/database/supabase/utilisateurDB.dart';
+import 'package:sae/models/utilisateur.dart';
 import 'package:supabase/supabase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 
 class Connexion extends StatelessWidget {
@@ -60,42 +63,41 @@ class Connexion extends StatelessWidget {
                       }
 
                       // Interrogation de la base de données pour vérifier l'utilisateur
-                      final response = await supabase.from('utilisateur').select().eq('pseudo', nomUtilisateur).eq('motdepasse', motDePasse);
-                      print(response);
-
-                      // Vérifier la réponse
-                      if (response.isEmpty) {
-                        // Gérer les erreurs
+                      late Utilisateur? u;
+                      try {
+                          u = await UtilisateurDB
+                            .getUtilisateurByPseudoAndMotDePasse(
+                            nomUtilisateur, motDePasse);
+                      } catch (e) {
                         final snackBar = SnackBar(
                           content: Text('Erreur lors de la connexion'),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      }
+                      if (u != null) {
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        prefs.setString('pseudoUtilConnecte', nomUtilisateur);
+                        prefs.setInt('idUtilConnecte', u.id);
+
+                        print(prefs);
+                        print(prefs.getString('pseudoUtilConnecte'));
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Home(supabase: supabase)),
+                        );
                       } else {
-                        // Vérifier si l'utilisateur a été trouvé
-                        if ((response as List).isEmpty) {
-                          // Utilisateur non trouvé
-                          final snackBar = SnackBar(
-                            content: Text('Nom d\'utilisateur ou mot de passe incorrect'),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        } else {
-                          // Utilisateur trouvé
-                          final snackBar = SnackBar(
-                            content: Text('Connexion réussie'),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => Home(supabase: supabase)),
-                          );
-                        }
+                        final snackBar = SnackBar(
+                          content: Text(
+                              'Nom d\'utilisateur ou mot de passe incorrect'),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
                     },
                     child: const Text('Connexion'),
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => Inscription(supabase: supabase)),
                       );

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sae/UI/produits.dart';
 import 'package:sae/models/utilisateur.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilPage extends StatelessWidget {
-
   Future<void> _chargerInformationsUtilisateur() async {
     final pseudo = await SharedPreferences.getInstance().then((prefs) {
       return prefs.getString('pseudoUtilConnecte');
@@ -24,8 +24,6 @@ class ProfilPage extends StatelessWidget {
     }
   }
 
-
-
   late String _pseudo = '';
   late String _lienImageProfil = 'default_user_image.png';
   late Utilisateur _utilisateur = Utilisateur(
@@ -43,7 +41,6 @@ class ProfilPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -61,91 +58,121 @@ class ProfilPage extends StatelessWidget {
             height: 1,
             color: Colors.grey,
           ),
-          Container(
-            padding: EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey, // Couleur de fond par défaut
-                    image: DecorationImage(
-                      image: AssetImage(
-                          'assets/user_img/default_user_image.png'),
-                      // Remplacez par le chemin de l'image de profil de l'utilisateur
-                      fit: BoxFit.cover,
+          InkWell(
+            onTap: () {
+              // Ajoutez votre action ici
+            },
+            child: Container(
+              padding: EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey, // Couleur de fond par défaut
+                      image: DecorationImage(
+                        image: AssetImage('assets/user_img/default_user_image.png'),
+                        // Remplacez par le chemin de l'image de profil de l'utilisateur
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: 16), // Espacement entre l'image et le texte
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _utilisateur.pseudo, // Remplacez par le pseudo de l'utilisateur
-                      style: TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8), // Espacement entre le pseudo et le label
-                    Text(
-                      'Voir mon profil',
-                      style: TextStyle(fontSize: 16, color: Colors.blue),
-                    ),
-                  ],
-                ),
-              ],
+                  SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _utilisateur.pseudo, // Remplacez par le pseudo de l'utilisateur
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Voir mon profil',
+                        style: TextStyle(fontSize: 16, color: Colors.blue),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          SizedBox(height: 20), // Espacement après le rectangle de profil
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Mes objets',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Divider(
-                  height: 1,
-                  color: Colors.grey,
-                ),
-              ],
+          SizedBox(height: 20),
+          Container(
+            color: Colors.grey,
+            height: 10,
+          ),
+          Divider(
+            height: 1,
+            color: Colors.grey,
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => WidgetProduits()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(Icons.inventory),
+                  SizedBox(width: 16),
+                  Text(
+                    'Mes objets',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Mes annonces',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Divider(
-                  height: 1,
-                  color: Colors.grey,
-                ),
-              ],
+          Divider(
+            height: 1,
+            color: Colors.grey,
+          ),
+          InkWell(
+            onTap: () {
+              // Ajoutez votre action ici
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(Icons.campaign),
+                  SizedBox(width: 16),
+                  Text(
+                    'Mes annonces',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Mes réservations',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Divider(
-                  height: 1,
-                  color: Colors.grey,
-                ),
-              ],
+          Divider(
+            height: 1,
+            color: Colors.grey,
+          ),
+          InkWell(
+            onTap: () {
+              // Ajoutez votre action ici
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(Icons.handshake),
+                  SizedBox(width: 16),
+                  Text(
+                    'Mes réservations',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
+          ),
+          Divider(
+            height: 1,
+            color: Colors.grey,
           ),
         ],
       ),

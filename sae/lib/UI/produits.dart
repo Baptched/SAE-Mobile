@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:sae/database/sqflite/database.dart';
-import 'package:sae/models/Produit.dart';
+import 'package:sae/models/produit.dart';
 import 'package:sqflite/sqflite.dart';
 
-
 class WidgetProduits extends StatefulWidget {
+
+   // late final List<Produit> produits;
+
   @override
   _WidgetProduitsState createState() => _WidgetProduitsState();
 }
 
 class _WidgetProduitsState extends State<WidgetProduits> {
-
   late List<Produit> _produits;
+
+  Future<void> _chargerProduits() async {
+    final produits = await _getProduits();
+    setState(() {
+      _produits = produits;
+    });
+  }
 
   Future<List<Produit>> _getProduits() async {
     // Get a reference to the database.
@@ -33,13 +41,11 @@ class _WidgetProduitsState extends State<WidgetProduits> {
     });
   }
 
-
   @override
   void initState() {
     super.initState();
-    _getProduits();
+    _chargerProduits();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +53,8 @@ class _WidgetProduitsState extends State<WidgetProduits> {
       appBar: AppBar(
         title: Text('Liste des produits'),
       ),
-      body: ListView.builder(
+      body: _produits != null
+          ? ListView.builder(
         itemCount: _produits.length,
         itemBuilder: (context, index) {
           final produit = _produits[index];
@@ -64,7 +71,8 @@ class _WidgetProduitsState extends State<WidgetProduits> {
             },
           );
         },
-      ),
+      )
+          : Center(child: CircularProgressIndicator()),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Navigate to add product page

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sae/UI/connexion.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:supabase/supabase.dart';
 
@@ -99,8 +100,10 @@ class Inscription extends StatelessWidget {
                   await UtilisateurDB.insererUtilisateur(u);
 
                   // Retour à la page de connexion
-                  Navigator.pop(context);
-
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => Connexion(supabase: supabase)),
+                  );
                   // Affichage d'un message de succès
                   final snackBar = SnackBar(
                     content: Text('Inscription réussie'),

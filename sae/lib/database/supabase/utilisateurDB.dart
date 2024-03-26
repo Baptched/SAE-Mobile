@@ -5,6 +5,7 @@ class UtilisateurDB {
 
 
   static Future<void> insererUtilisateur(Utilisateur utilisateur) async {
+
     await MyApp.client
         .from('utilisateur')
         .insert([
@@ -13,7 +14,7 @@ class UtilisateurDB {
         'prenomu': utilisateur.prenom,
         'pseudo': utilisateur.pseudo,
         'motdepasse': utilisateur.motDePasse,
-        'imageprofil': utilisateur.imageProfil,
+        'imageprofil': utilisateur.imageProfilBytes,
       }
     ]);
   }
@@ -81,7 +82,7 @@ class UtilisateurDB {
       'nomu': utilisateur.nom,
       'prenomu': utilisateur.prenom,
       'motdepasse': utilisateur.motDePasse,
-      'imageprofil': utilisateur.imageProfil,
+      'imageprofil': utilisateur.imageProfilBytes,
     })
         .eq('id', utilisateur.id);
   }

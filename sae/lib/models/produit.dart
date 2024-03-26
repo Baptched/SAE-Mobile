@@ -1,8 +1,8 @@
 class Produit {
-  final int? id;
-  final String label;
-  final String condition;
-  final int disponible;
+  int? id;
+  String label;
+  String condition;
+  int disponible;
   String lienImageProduit;
 
   Produit({

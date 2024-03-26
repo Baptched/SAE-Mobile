@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:sae/UI/ajout_produit.dart';
 import 'package:sae/database/sqflite/database.dart';
 import 'package:sae/models/produit.dart';
 import 'package:sqflite/sqflite.dart';
 
 class WidgetProduits extends StatefulWidget {
 
-   // late final List<Produit> produits;
-
   @override
   _WidgetProduitsState createState() => _WidgetProduitsState();
 }
 
 class _WidgetProduitsState extends State<WidgetProduits> {
-  late List<Produit> _produits;
+  List<Produit>? _produits;
 
   Future<void> _chargerProduits() async {
     final produits = await _getProduits();
@@ -49,37 +48,46 @@ class _WidgetProduitsState extends State<WidgetProduits> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Liste des produits'),
-      ),
-      body: _produits != null
-          ? ListView.builder(
-        itemCount: _produits.length,
-        itemBuilder: (context, index) {
-          final produit = _produits[index];
-          return ListTile(
-            title: Text(produit.label),
-            subtitle: Text(produit.condition),
-            // Add more information to display if needed
-            leading: CircleAvatar(
-              backgroundImage: AssetImage(produit.lienImageProduit),
-            ),
-            // Handle tapping on product if needed
-            onTap: () {
-              // Add your logic to handle tapping on a product
-            },
-          );
-        },
-      )
-          : Center(child: CircularProgressIndicator()),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to add product page
-          // Add your navigation logic here when adding a new product
-        },
-        child: Icon(Icons.add),
-      ),
-    );
+
+    if (_produits == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    else {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Liste des produits'),
+        ),
+        body: _produits!.isEmpty
+            ? const Center(
+          child: Text('Vous n\'avez actuellement pas d\'objets enregistrés'),
+        )
+            : ListView.builder(
+          itemCount: _produits!.length,
+          itemBuilder: (context, index) {
+            final produit = _produits![index];
+            return ListTile(
+              title: Text(produit.label),
+              subtitle: Text(produit.condition),
+              // Add more information to display if needed
+              leading: CircleAvatar(
+                backgroundImage:
+                AssetImage(produit.lienImageProduit),
+              ),
+              // Handle tapping on product if needed
+              onTap: () {
+                // Add your logic to handle tapping on a product
+              },
+            );
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => PageAjoutProduit()));
+          },
+          child: Icon(Icons.add),
+        ),
+      );
+    }
   }
 }

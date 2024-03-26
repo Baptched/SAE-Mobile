@@ -1,5 +1,5 @@
 import 'package:sae/database/sqflite/database.dart';
-import 'package:sae/models/Produit.dart';
+import 'package:sae/models/produit.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ProduitDB {

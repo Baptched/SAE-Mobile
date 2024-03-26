@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:sae/UI/produits.dart';
 import 'package:sae/models/utilisateur.dart';
@@ -17,7 +19,6 @@ class ProfilPage extends StatelessWidget {
       final utilisateur = await UtilisateurDB.getUtilisateurByPseudo(_pseudo);
       if (utilisateur != null) {
         _utilisateur = utilisateur;
-        _lienImageProfil = utilisateur.imageProfil;
       }
     } catch (e) {
       print('Erreur lors de la récupération des informations utilisateur: $e');
@@ -25,14 +26,12 @@ class ProfilPage extends StatelessWidget {
   }
 
   late String _pseudo = '';
-  late String _lienImageProfil = 'default_user_image.png';
   late Utilisateur _utilisateur = Utilisateur(
     id: 0,
     nom: '',
     prenom: '',
     pseudo: '',
     motDePasse: '',
-    imageProfil: 'default_user_image.png',
   );
 
   ProfilPage() {
@@ -73,7 +72,9 @@ class ProfilPage extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: Colors.grey, // Couleur de fond par défaut
                       image: DecorationImage(
-                        image: AssetImage('assets/user_img/default_user_image.png'),
+                        image: _utilisateur.imageProfilBytes != null
+                            ? MemoryImage(Uint8List.fromList(_utilisateur.imageProfilBytes!))
+                          : AssetImage('assets/user_img/default_user_image.png') as ImageProvider,
                         // Remplacez par le chemin de l'image de profil de l'utilisateur
                         fit: BoxFit.cover,
                       ),

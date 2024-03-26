@@ -45,12 +45,10 @@ class ProfilPage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Profil'),
-      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SizedBox(height: 50),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Text(

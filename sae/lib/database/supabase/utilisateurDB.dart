@@ -2,8 +2,6 @@ import 'package:sae/main.dart';
 import 'package:sae/models/utilisateur.dart';
 class UtilisateurDB {
 
-
-
   static Future<void> insererUtilisateur(Utilisateur utilisateur) async {
     await MyApp.client
         .from('utilisateur')
@@ -30,8 +28,6 @@ class UtilisateurDB {
     }
 
     return Utilisateur.fromJson(data[0]);
-
-
   }
 
   static Future<Utilisateur?> getUtilisateurById(int id) async {
@@ -39,11 +35,9 @@ class UtilisateurDB {
         .from('utilisateur')
         .select()
         .eq('id', id);
-
     if (data.isEmpty) {
       return null;
     }
-
     return Utilisateur.fromJson(data[0]);
   }
 
@@ -53,11 +47,9 @@ class UtilisateurDB {
         .select()
         .eq('pseudo', pseudo)
         .eq('motdepasse', motDePasse);
-
     if (data.isEmpty) {
       return null;
     }
-
     return Utilisateur.fromJson(data[0]);
   }
 
@@ -65,9 +57,7 @@ class UtilisateurDB {
     final data = await MyApp.client
         .from('utilisateur')
         .select();
-
     List<Utilisateur> utilisateurs = [];
-
     for (var utilisateur in data) {
       utilisateurs.add(Utilisateur.fromJson(utilisateur));
     }
@@ -105,6 +95,4 @@ class UtilisateurDB {
         .from('utilisateur')
         .delete();
   }
-
-
 }

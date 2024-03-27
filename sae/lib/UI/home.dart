@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase/supabase.dart';
 import 'annonce.dart';
 import 'favorie.dart';
 import 'ajout.dart';
@@ -7,9 +6,6 @@ import 'messages.dart';
 import 'profil.dart';
 
 class Home extends StatefulWidget {
-  final SupabaseClient supabase;
-
-  const Home({Key? key, required this.supabase}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -19,7 +15,7 @@ class _HomePageState extends State<Home> {
   int _selectedIndex = 0;
 
   static List<Widget> _widgetOptions = <Widget>[
-    AnnoncesPage(), // Page des annonces
+    AnnoncesPage(),
     FavorisPage(),
     AjoutPage(),
     MessagesPage(),

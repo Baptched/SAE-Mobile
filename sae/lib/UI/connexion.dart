@@ -77,13 +77,11 @@ class Connexion extends StatelessWidget {
                         SharedPreferences prefs = await SharedPreferences.getInstance();
                         prefs.setString('pseudoUtilConnecte', nomUtilisateur);
                         prefs.setInt('idUtilConnecte', u.id);
-
-                        print(prefs);
-                        print(prefs.getString('pseudoUtilConnecte'));
+                        int idUser = u.id;
 
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Home(supabase: supabase)),
+                          MaterialPageRoute(builder: (context) => Home()),
                         );
                       } else {
                         final snackBar = SnackBar(

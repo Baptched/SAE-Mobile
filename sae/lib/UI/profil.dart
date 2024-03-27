@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -40,6 +41,12 @@ class ProfilPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(_utilisateur.imageProfilBytes);
+    // print the type of imageProfilbytes
+    print(_utilisateur.imageProfilBytes.runtimeType);
+
+    print(_utilisateur.imageProfilBytes?.lengthInBytes);
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -70,12 +77,16 @@ class ProfilPage extends StatelessWidget {
                     height: 80,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.grey, // Couleur de fond par défaut
-                      image: DecorationImage(
-                        image: _utilisateur.imageProfilBytes != null
-                            ? MemoryImage(Uint8List.fromList(_utilisateur.imageProfilBytes!))
-                          : AssetImage('assets/user_img/default_user_image.png') as ImageProvider,
-                        // Remplacez par le chemin de l'image de profil de l'utilisateur
+                      color: Colors.grey, // Default background color
+                      image: _utilisateur.imageProfilBytes != null
+                      // If there’s a profile image, use it
+                          ? DecorationImage(
+                        image: MemoryImage(_utilisateur.imageProfilBytes!),
+                        fit: BoxFit.cover,
+                      )
+                      // Else, use a default image from assets
+                          : DecorationImage(
+                        image: AssetImage('assets/user_img/default_user_image.png'),
                         fit: BoxFit.cover,
                       ),
                     ),

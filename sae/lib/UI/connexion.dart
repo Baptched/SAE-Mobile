@@ -63,16 +63,10 @@ class Connexion extends StatelessWidget {
                       }
 
                       // Interrogation de la base de données pour vérifier l'utilisateur
-                      late Utilisateur? u;
-                      try {
-                          u = await UtilisateurDB
+                      Utilisateur? u = await UtilisateurDB
                             .getUtilisateurByPseudoAndMotDePasse(
                             nomUtilisateur, motDePasse);
-                      } catch (e) {
-                        final snackBar = SnackBar(
-                          content: Text('Erreur lors de la connexion'),
-                        );
-                      }
+
                       if (u != null) {
                         SharedPreferences prefs = await SharedPreferences.getInstance();
                         prefs.setString('pseudoUtilConnecte', nomUtilisateur);
@@ -97,7 +91,7 @@ class Connexion extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => Inscription(supabase: supabase)),
                       );

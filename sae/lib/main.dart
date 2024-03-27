@@ -13,9 +13,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    UtilisateurDB.getUtilisateurByPseudo("kykys");
-
-
     return MaterialApp(
       title: 'SAE',
       theme: ThemeData(

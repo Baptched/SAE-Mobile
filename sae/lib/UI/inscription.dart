@@ -1,4 +1,9 @@
+import 'dart:typed_data';
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sae/UI/connexion.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:supabase/supabase.dart';
@@ -89,18 +94,24 @@ class Inscription extends StatelessWidget {
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     return;
                   }
+
+                  ByteData imageData = await rootBundle.load('assets/product_img/default_user_image.png');
+                  Uint8List imageProfilBytesList = imageData.buffer.asUint8List();
+                  print(imageProfilBytesList);
+
+
                   Utilisateur u = Utilisateur(
                     id: 0,
                     prenom: prenom,
                     nom: nom,
                     pseudo: pseudo,
                     motDePasse: motDePasse,
+                    imageProfilBytes: imageProfilBytesList,
                   );
 
                   await UtilisateurDB.insererUtilisateur(u);
 
-                  // Retour à la page de connexion
-                  Navigator.pushReplacement(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => Connexion(supabase: supabase)),
                   );

@@ -29,7 +29,7 @@ class UtilisateurDB {
     if (data.isEmpty) {
       return null;
     }
-
+    print(data[0]);
     return Utilisateur.fromJson(data[0]);
 
 
@@ -55,9 +55,11 @@ class UtilisateurDB {
         .eq('pseudo', pseudo)
         .eq('motdepasse', motDePasse);
 
+    print(data);
     if (data.isEmpty) {
       return null;
     }
+
 
     return Utilisateur.fromJson(data[0]);
   }

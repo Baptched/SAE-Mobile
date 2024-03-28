@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sae/database/sqflite/database.dart';
-import 'package:sae/models/produit.dart';
-import 'package:sqflite/sqflite.dart';
+import 'dart:io'; // Pour File
+import 'package:image_picker/image_picker.dart';
 
 class PageAjoutProduit extends StatefulWidget {
   @override
@@ -11,10 +10,26 @@ class PageAjoutProduit extends StatefulWidget {
 class _PageAjoutProduitState extends State<PageAjoutProduit> {
   late String _label;
   late String _condition = 'Neuf';
-  late bool _disponible = true; // Par défaut, le produit est disponible
-  late String _lienImageProduit;
+  late bool _disponible = true;
+  File? _imageProduit;
 
   final _formKey = GlobalKey<FormState>();
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _choisirImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _imageProduit = File(image.path);
+      });
+    }
+  }
+
+  Future<void> _supprimerImage() async {
+    setState(() {
+      _imageProduit = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +44,9 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              SizedBox(height: 16.0),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Label'),
+                decoration: InputDecoration(labelText: 'Label de l\'objet'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer un label';
@@ -41,53 +57,54 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
                   _label = value!;
                 },
               ),
-              SizedBox(height: 16.0),
+              SizedBox(height: 32.0),
+              Text('Condition de l\'objet', style: TextStyle(fontSize: 16.0)),
               DropdownButtonFormField<String>(
                 value: _condition,
-                onChanged: (newValue) {
-                  setState(() {
-                    _condition = newValue!;
-                  });
-                },
-                items: ['Neuf', 'Bon état', 'État moyen', 'Abîmé']
-                    .map<DropdownMenuItem<String>>((String value) {
+                items: <String>['Neuf', 'Très bon état', 'Bon état','Etat moyen', 'Abîmé'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
                   );
                 }).toList(),
-                decoration: InputDecoration(
-                  labelText: 'Condition',
-                  border: OutlineInputBorder(),
+                onChanged: (String? value) {
+                  setState(() {
+                    _condition = value!;
+                  });
+                },
+              ),
+              SizedBox(height: 32.0),
+              ElevatedButton(
+                onPressed: _choisirImage,
+                child: Text('Ajouter une image'),
+              ),
+              if (_imageProduit != null)
+                Container(
+                  height: 200,
+                  width: 200,// Taille de la prévisualisation de l'image
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    image: DecorationImage(
+                      image: FileImage(_imageProduit!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: _supprimerImage,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez choisir une condition';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16.0),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Lien de l\'image'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un lien d\'image';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _lienImageProduit = value!;
-                },
-              ),
-              SizedBox(height: 16.0),
+              Spacer(),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    // Créer et sauvegarder le produit dans la base de données
-                    _ajouterProduit();
-                  }
+                  // Assurez-vous de valider et sauvegarder les informations du formulaire avant de procéder
                 },
                 child: Text('Ajouter'),
               ),
@@ -96,19 +113,5 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
         ),
       ),
     );
-  }
-
-  Future<void> _ajouterProduit() async {
-    int dispo = _disponible ? 1 : 0;
-    Produit produit = Produit(
-      label: _label,
-      condition: _condition,
-      disponible: dispo,
-      lienImageProduit: _lienImageProduit,
-    );
-
-    // Insérer le produit dans la base de données
-    //TODO
-    Navigator.pop(context); // Revenir à la page précédente après l'ajout du produit
   }
 }

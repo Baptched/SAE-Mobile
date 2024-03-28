@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -13,6 +14,12 @@ import '../models/utilisateur.dart';
 class Inscription extends StatelessWidget {
   final SupabaseClient supabase;
 
+ // void _testStorageSupabase() async {
+   // final ByteData imageData = await rootBundle.load('assets/user_img/default_user_image.png');
+   // final Uint8List data = imageData.buffer.asUint8List();
+   // final storageResponse = await supabase.storage.from('images').uploadBinary("default_user_image",data);
+  //}
+
   const Inscription({Key? key, required this.supabase}) : super(key: key);
 
   @override
@@ -21,6 +28,8 @@ class Inscription extends StatelessWidget {
     TextEditingController nomController = TextEditingController();
     TextEditingController pseudoController = TextEditingController();
     TextEditingController motDePasseController = TextEditingController();
+
+//    _testStorageSupabase();
 
     return Scaffold(
       appBar: AppBar(

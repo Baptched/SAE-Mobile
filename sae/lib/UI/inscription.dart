@@ -12,7 +12,6 @@ import 'package:supabase/supabase.dart';
 import '../models/utilisateur.dart';
 
 class Inscription extends StatelessWidget {
-  final SupabaseClient supabase;
 
  // void _testStorageSupabase() async {
    // final ByteData imageData = await rootBundle.load('assets/user_img/default_user_image.png');
@@ -20,10 +19,11 @@ class Inscription extends StatelessWidget {
    // final storageResponse = await supabase.storage.from('images').uploadBinary("default_user_image",data);
   //}
 
-  const Inscription({Key? key, required this.supabase}) : super(key: key);
+  const Inscription({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+
     TextEditingController prenomController = TextEditingController();
     TextEditingController nomController = TextEditingController();
     TextEditingController pseudoController = TextEditingController();
@@ -122,7 +122,7 @@ class Inscription extends StatelessWidget {
 
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Connexion(supabase: supabase)),
+                    MaterialPageRoute(builder: (context) => Connexion()),
                   );
                   // Affichage d'un message de succès
                   final snackBar = SnackBar(

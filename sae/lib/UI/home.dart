@@ -4,8 +4,13 @@ import 'favorie.dart';
 import 'ajout.dart';
 import 'messages.dart';
 import 'profil.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart'; // Importez le package path_provider pour utiliser getApplicationDocumentsDirectory()
+
 
 class Home extends StatefulWidget {
+
+  static late String lienDossierImagesLocal;
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -26,6 +31,17 @@ class _HomePageState extends State<Home> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initialiser();
+  }
+
+  Future<void> _initialiser() async {
+    Home.lienDossierImagesLocal = await obtenirLienDossierImagesLocal();
+    print(Home.lienDossierImagesLocal);
   }
 
   @override
@@ -62,4 +78,10 @@ class _HomePageState extends State<Home> {
       ),
     );
   }
+
+  Future<String> obtenirLienDossierImagesLocal() async {
+    final String directory = (await getApplicationDocumentsDirectory()).path;
+    return p.join(directory, 'sae_mobile_product_img');
+  }
 }
+

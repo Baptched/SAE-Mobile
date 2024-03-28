@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:sae/UI/inscription.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:sae/models/utilisateur.dart';
-import 'package:supabase/supabase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 
 class Connexion extends StatelessWidget {
-  final SupabaseClient supabase;
 
-  const Connexion({Key? key, required this.supabase}) : super(key: key);
+  const Connexion({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +89,7 @@ class Connexion extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Inscription(supabase: supabase)),
+                        MaterialPageRoute(builder: (context) => Inscription()),
                       );
                     },
                     child: const Text('Inscription'),

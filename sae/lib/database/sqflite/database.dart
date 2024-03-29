@@ -42,6 +42,7 @@ class DatabaseHelper {
       CREATE TABLE annonce (
         idA INTEGER PRIMARY KEY AUTOINCREMENT,
         titreA TEXT,
+        descriptionA TEXT,
         dureeReservation INTEGER,
         etatA TEXT,
         enLigne INTEGER,
@@ -69,6 +70,12 @@ class DatabaseHelper {
         PRIMARY KEY (idP, idCat)
       )
     ''');
+  }
+
+  // drop database
+  Future<void> dropDatabase() async {
+    String path = join(await getDatabasesPath(), 'produits.db');
+    await deleteDatabase(path);
   }
 
   Future<int> insererProduit(String label, String condition, int disponible, String lienImageProduit) async {

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:sae/database/sqflite/database.dart';
 import 'annonce.dart';
 import 'favorie.dart';
-import 'ajout.dart';
+import 'ajout_annonce.dart';
 import 'messages.dart';
 import 'profil.dart';
 import 'package:path/path.dart' as p;
@@ -22,7 +23,7 @@ class _HomePageState extends State<Home> {
   static List<Widget> _widgetOptions = <Widget>[
     AnnoncesPage(),
     FavorisPage(),
-    AjoutPage(),
+    WidgetAjoutAnnonce(),
     MessagesPage(),
     ProfilPage(),
   ];
@@ -42,6 +43,7 @@ class _HomePageState extends State<Home> {
   Future<void> _initialiser() async {
     Home.lienDossierImagesLocal = await obtenirLienDossierImagesLocal();
     print(Home.lienDossierImagesLocal);
+    DatabaseHelper db = DatabaseHelper();
   }
 
   @override

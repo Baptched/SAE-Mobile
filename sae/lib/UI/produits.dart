@@ -16,27 +16,11 @@ class _WidgetProduitsState extends State<WidgetProduits> {
   List<Produit>? _produits;
 
   Future<void> _chargerProduits() async {
-    final produits = await _getProduits();
-
-    setState(() {
-      _produits = produits;
-    });
-  }
-
-  Future<List<Produit>> _getProduits() async {
-    DatabaseHelper helper = DatabaseHelper();
-    final Database db = await helper.database;
-    final List<Map<String, dynamic>> maps = await db.query('produit');
-
-    return List.generate(maps.length, (i) {
-      return Produit(
-        id: maps[i]['idP'],
-        label: maps[i]['labelP'],
-        condition: maps[i]['conditionP'],
-        disponible: maps[i]['disponible'],
-        lienImageProduit: maps[i]['lienImageProduit'],
-      );
-    });
+    await ProduitDB.getProduits().then((value) =>
+        setState(() {
+          _produits = value;
+        })
+    );
   }
 
   @override

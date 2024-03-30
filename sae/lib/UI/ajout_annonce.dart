@@ -1,8 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sae/UI/annonce.dart';
 import 'package:sae/database/sqflite/db_models/ProduitDB.dart';
 
+import '../models/annonce.dart';
 import '../models/produit.dart';
 import 'home.dart';
 
@@ -17,6 +20,10 @@ class _WidgetAjoutAnnonceState extends State<WidgetAjoutAnnonce> {
 
   List<Produit>? _produits;
   Produit? _selectedProduit;
+
+  TextEditingController _titreAnnonceController = TextEditingController();
+  TextEditingController _descriptionAnnonceController = TextEditingController();
+  TextEditingController _dureeReservationController = TextEditingController();
 
   Future<void> _chargerProduits() async {
     await ProduitDB.getProduitsDisponibles().then((value) =>
@@ -36,6 +43,36 @@ class _WidgetAjoutAnnonceState extends State<WidgetAjoutAnnonce> {
     await _chargerProduits();
   }
 
+  Future<void> _ajouterAnnonce() async {
+    if (_selectedProduit == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Veuillez sélectionner un produit.'),
+      ));
+      return;
+    }
+    if (_titreAnnonceController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Veuillez saisir un titre pour l\'annonce.'),
+      ));
+      return;
+    }
+    if (_dureeReservationController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Veuillez saisir une durée maximale de réservation.'),
+      ));
+      return;
+    }
+
+    Annonce annonce = Annonce(
+      id : 0,
+      titre : _titreAnnonceController.text,
+      description : _descriptionAnnonceController.text,
+      dureeReservationMax : int.parse(_dureeReservationController.text),
+      etat: "Disponible",
+      enLigne: 0,
+      idProduit : _selectedProduit!.id as int,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,30 +114,41 @@ class _WidgetAjoutAnnonceState extends State<WidgetAjoutAnnonce> {
                   ),
                 ),
               ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 32.0),
             TextFormField(
+              controller: _titreAnnonceController,
               decoration: InputDecoration(
+                border: OutlineInputBorder(),
                 labelText: 'Titre de l\'annonce',
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 32.0),
             TextFormField(
+              controller: _descriptionAnnonceController,
               decoration: InputDecoration(
+                border: OutlineInputBorder(),
                 labelText: 'Description de l\'annonce',
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 32.0),
             TextFormField(
+              controller: _dureeReservationController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
+                border: OutlineInputBorder(),
                 labelText: 'Durée maximale de réservation (en jours)',
               ),
             ),
-            SizedBox(height: 90.0),
+            SizedBox(height: 30.0),
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                // rien pour l'instant
+                  _ajouterAnnonce().then((value) =>
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AnnoncesPage()),
+                      ),
+                  );
                 },
                 child: Text('Ajouter l\'annonce'),
               ),

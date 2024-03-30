@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:sae/UI/mes_annonces.dart';
 import 'package:sae/UI/produits.dart';
 import 'package:sae/models/utilisateur.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
@@ -144,7 +145,8 @@ class ProfilPage extends StatelessWidget {
           ),
           InkWell(
             onTap: () {
-              // Ajoutez votre action ici
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => WidgetAnnonces()));
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),

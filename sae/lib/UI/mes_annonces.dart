@@ -2,9 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:sae/UI/home.dart';
-import 'package:sae/database/sqflite/db_models/AnnonceDB.dart';
-import 'package:sae/database/sqflite/db_models/ProduitDB.dart';
-import 'package:sae/main.dart';
+import 'package:sae/database/sqflite/db_models/AnnonceDB.dart' as sqflite;
+import 'package:sae/database/sqflite/db_models/ProduitDB.dart' as sqflite;
+
+import 'package:sae/database/supabase/annonceDB.dart' as supabase;
 
 import '../models/annonce.dart';
 import '../models/produit.dart';
@@ -19,17 +20,43 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
   List<Produit>? _produits;
 
   Future<void> _chargerAnnonces() async {
-    await AnnonceDB.getAnnonces().then((value) => setState(() {
+    await sqflite.AnnonceDB.getAnnonces().then((value) => setState(() {
       _annonces = value;
     }));
   }
 
   Future<void> _chargerProduits() async {
-    await ProduitDB.getProduits().then((value) => setState(() {
+    await sqflite.ProduitDB.getProduits().then((value) => setState(() {
       _produits = value;
     }));
   }
 
+  void _confirmerSuppressionAnnonce(Annonce annonce) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmation'),
+          content: Text('Voulez-vous vraiment supprimer cette annonce ?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Supprimer'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _supprimerAnnonce(annonce);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   Future<void> _afficherConfirmationPublication(Annonce annonce) async {
     final String action = annonce.enLigne == 1 ? 'Enlever la publication en ligne' : 'Publier l\'annonce en ligne';
     return showDialog<void>(
@@ -66,40 +93,35 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
   }
 
   Future<void> _publierAnnonce(Annonce annonce, bool publier) async {
-    // Mettre à jour l'état de l'annonce dans la base de données ou effectuer toute autre opération nécessaire
-    // Ici, vous pouvez appeler votre méthode pour mettre à jour l'état de l'annonce
-    // par exemple : await AnnonceDB.publierAnnonce(annonce.id, publier);
     if (publier){
-      //TODO : penser aux SEtState
+      //TODO: publier le produit associé avant a chaque fois... eh oui fallait mieux concevoir la base et la faire comme baptiste avait dit fdp
+      supabase.AnnonceDB.insererAnnonce(annonce);
     }
     else{
-      //TODO: on enlève l'annonce  de la base en ligne
+      supabase.AnnonceDB.deleteAnnonceByAttributs(annonce);
     }
+    setState(() {
+      annonce.enLigne = publier ? 1 : 0;
+    });
   }
 
   Future<void> _supprimerAnnonce(Annonce annonce) async {
-
-    //TODO: supprimer en ligne si elle l'est et en local
     if (annonce.enLigne == 1){
-      await AnnonceDB.deleteAnnonce(annonce.id as int);
-      MyApp.client.from('annonce').delete()
-          .eq('titrea', annonce.titre)
-          .eq('descriptiona', annonce.description)
-          .eq('dureereservation', annonce.dureeReservationMax);
+      await supabase.AnnonceDB.deleteAnnonceByAttributs(annonce);
+      await sqflite.AnnonceDB.deleteAnnonce(annonce.id as int);
     }
     else {
-      await AnnonceDB.deleteAnnonce(annonce.id as int);
+      await sqflite.AnnonceDB.deleteAnnonce(annonce.id as int);
     }
     setState(() {
       _annonces!.remove(annonce);
     });
-
   }
 
   @override
   void initState() {
     super.initState();
-    _initialiser();
+      _initialiser();
   }
 
   @override
@@ -116,6 +138,14 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
 
   @override
   Widget build(BuildContext context) {
+
+    late int longueur;
+    if (_annonces == null || _produits == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    else {
+      longueur = (_annonces as List<Annonce>).length;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Liste des annonces'),
@@ -132,85 +162,114 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
                 child: Text('Aucune annonce disponible.'),
               )
             else
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: _annonces!.length,
-                itemBuilder: (context, index) {
-                  final annonce = _annonces![index];
-                  // Récupérer le produit associé à l'annonce
-                  final Produit? produit = _produits?.firstWhere((element) => element.id == annonce.idProduit);
+              SizedBox(height: 8.0),
+            Center(
+              // text en italique
+              child: Text(
+                  'Cliquez sur une annonce pour la publier en ligne ou supprimer sa publication',
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic, fontSize: 8,
+                  )),
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: longueur,
+              itemBuilder: (context, index) {
+                final annonce = _annonces![index];
+                final Produit? produit = _produits?.firstWhere((element) => element.id == annonce.idProduit);
 
-                  late ImageProvider image;
-                  try {
-                    image = FileImage(File(Home.lienDossierImagesLocal+"/"+produit!.lienImageProduit));
-                  } catch (e) {
-                    image = AssetImage('assets/product_img/default_produit_image.png');
-                  }
-                  return Container(
-                      margin: EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset:
-                            Offset(0, 2), // changes position of shadow
-                          ),
-                        ],
+                late ImageProvider image;
+                try {
+                  image = FileImage(File(Home.lienDossierImagesLocal+"/"+produit!.lienImageProduit));
+                } catch (e) {
+                  image = AssetImage('assets/product_img/default_produit_image.png');
+                }
+                return Container(
+                  margin: EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: Offset(0, 2), // changes position of shadow
+                      ),
+                    ],
                   ),
-                  child: ListTile(
-                    title: Text(annonce.titre, style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(annonce.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12)),
-                        SizedBox(height: 4),
-                        Text('Durée maximale de réservation: ${annonce.dureeReservationMax} jours', style: TextStyle(fontSize: 12)),
-                      ],
-                    ),
-                    leading: CircleAvatar(
-                      // Vous pouvez afficher l'image de l'objet associé à l'annonce ici
-                      backgroundImage: image,
-                    ),
-                    trailing:
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              annonce.enLigne == 1 ? Icons.check_circle : Icons.cancel,
-                              color: annonce.enLigne ==1  ? Colors.green : Colors.red,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              annonce.enLigne == 1 ? 'Publiée' : 'Non publiée',
-                              style: TextStyle(
-                                color: annonce.enLigne ==1 ? Colors.green : Colors.red,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        Text("Etat : ${annonce.etat}", style: TextStyle(fontSize: 8)),
-                        SizedBox(height: 32),
-                        // icon delete to delete
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            _supprimerAnnonce(annonce);
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            _afficherConfirmationPublication(annonce);
                           },
+                          child: ListTile(
+                            title: Text(
+                              annonce.titre,
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            subtitle: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.start,
+                              children: [
+                                Text(
+                                  annonce.description,
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                                SizedBox(height: 40),
+                                Text(
+                                  'Durée maximale de réservation: ${annonce.dureeReservationMax} jours',
+                                  style: TextStyle(fontSize: 8),
+                                ),
+                              ],
+                            ),
+                            leading: CircleAvatar(
+                              backgroundImage: image,
+                            ),
+                            trailing: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        annonce.enLigne == 1 ? Icons.check_circle : Icons.cancel,
+                                        color: annonce.enLigne ==1  ? Colors.green : Colors.red, size: 16,
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        annonce.enLigne == 1 ? 'Publiée' : 'Non publiée',
+                                        style: TextStyle(
+                                          color: annonce.enLigne ==1 ? Colors.green : Colors.red,
+                                          fontSize: 8,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    "Etat : ${annonce.etat}",
+                                    style: TextStyle(fontSize: 8),
+                                  ),
+                                ]
+                            ),
+                          ),
                         ),
-                      ]
-                    )
-
-                  ));
-                },
-              ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, size: 16, color: Colors.red),
+                        onPressed: () {
+                          _confirmerSuppressionAnnonce(annonce);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),

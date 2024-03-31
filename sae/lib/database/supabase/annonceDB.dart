@@ -55,4 +55,14 @@ class AnnonceDB {
         .delete()
         .eq('idp', id);
   }
+
+  static Future<void> deleteAnnonceByAttributs(Annonce annonce) async {
+    await MyApp.client
+        .from('annonce')
+        .delete()
+        .eq('titrea', annonce.titre)
+        .eq('descriptiona', annonce.description)
+        .eq('dureereservation', annonce.dureeReservationMax)
+        .eq('idp', annonce.idProduit);
+  }
 }

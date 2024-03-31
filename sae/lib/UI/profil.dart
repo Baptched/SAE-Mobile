@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:sae/UI/mes_annonces.dart';
 import 'package:sae/UI/produits.dart';
@@ -18,7 +15,6 @@ class ProfilPage extends StatelessWidget {
     if (pseudo != null) {
       _pseudo = pseudo;
     }
-    // Récupérer les informations de l'utilisateur depuis la base de données
     try {
       final utilisateur = await UtilisateurDB.getUtilisateurByPseudo(_pseudo);
       if (utilisateur != null) {
@@ -44,12 +40,17 @@ class ProfilPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(_utilisateur.imageProfilBytes);
-    // print the type of imageProfilbytes
-    print(_utilisateur.imageProfilBytes.runtimeType);
-
-    print(_utilisateur.imageProfilBytes?.lengthInBytes);
-
+/*    late ImageProvider imageProfil;
+    late CircleAvatar circleAvatar;
+    try {
+      print("a");
+      imageProfil = MemoryImage(_utilisateur.imageProfilBytes!);
+      circleAvatar = CircleAvatar(backgroundImage: imageProfil, radius: 30);
+    } catch (e) {
+      imageProfil = AssetImage('assets/user_img/default_user_image.png');
+      circleAvatar = CircleAvatar(backgroundImage: imageProfil, radius: 30);
+      print("c");
+    }*/
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,37 +70,22 @@ class ProfilPage extends StatelessWidget {
           ),
           InkWell(
             onTap: () {
-              // Ajoutez votre action ici
+              // Pour l'action : voir mon profil / le modifier ( jsp si on le fera )
             },
             child: Container(
               padding: EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey, // Default background color
-                      image: _utilisateur.imageProfilBytes != null
-                      // If there’s a profile image, use it
-                          ? DecorationImage(
-                        image: MemoryImage(_utilisateur.imageProfilBytes!),
-                        fit: BoxFit.cover,
-                      )
-                      // Else, use a default image from assets
-                          : DecorationImage(
-                        image: AssetImage('assets/user_img/default_user_image.png'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  CircleAvatar(
+                    backgroundImage: AssetImage('assets/user_img/default_user_image.png'),
+                    radius: 30,
                   ),
                   SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _utilisateur.pseudo, // Remplacez par le pseudo de l'utilisateur
+                        _utilisateur.pseudo,
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8),
@@ -141,14 +127,14 @@ class ProfilPage extends StatelessWidget {
               ),
             ),
           ),
-          Divider(
+       Divider(
             height: 1,
             color: Colors.grey,
           ),
           InkWell(
             onTap: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => WidgetAnnonces ()));
+                  MaterialPageRoute(builder: (context) => WidgetAnnonces()));
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -190,21 +176,25 @@ class ProfilPage extends StatelessWidget {
             height: 1,
             color: Colors.grey,
           ),
-      ElevatedButton(
-        onPressed: () {
-          // Action de déconnexion
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Connexion()));
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red, // Couleur du bouton
-          padding: EdgeInsets.symmetric(vertical: 16.0), // Espacement interne
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)), // Bordures arrondies
-        ),
-        child: Text(
-          'Se déconnecter',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-      ),
+      SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 120.0),
+            child: ElevatedButton(
+              onPressed: () {
+                // Action de déconnexion
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Connexion()));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Couleur de fond
+                padding: EdgeInsets.symmetric(vertical: 16.0), // Espacement interne
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)), // Bordures arrondies
+              ),
+              child: Text(
+                'Se déconnecter',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
+          ),
         ],
       ),
     );

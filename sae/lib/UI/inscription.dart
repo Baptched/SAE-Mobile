@@ -106,8 +106,6 @@ class Inscription extends StatelessWidget {
 
                   ByteData imageData = await rootBundle.load('assets/product_img/default_user_image.png');
                   Uint8List imageProfilBytesList = imageData.buffer.asUint8List();
-                  print(imageProfilBytesList);
-
 
                   Utilisateur u = Utilisateur(
                     id: 0,

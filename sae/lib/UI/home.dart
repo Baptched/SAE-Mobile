@@ -12,6 +12,9 @@ import 'package:path_provider/path_provider.dart'; // Importez le package path_p
 class Home extends StatefulWidget {
 
   static late String lienDossierImagesLocal;
+  final int indexInitial;
+
+  Home({required this.indexInitial});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -38,12 +41,12 @@ class _HomePageState extends State<Home> {
   void initState() {
     super.initState();
     _initialiser();
+    _selectedIndex = widget.indexInitial;
   }
 
   Future<void> _initialiser() async {
     Home.lienDossierImagesLocal = await obtenirLienDossierImagesLocal();
     print(Home.lienDossierImagesLocal);
-    DatabaseHelper db = DatabaseHelper();
   }
 
   @override

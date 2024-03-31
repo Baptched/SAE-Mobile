@@ -73,7 +73,7 @@ class Connexion extends StatelessWidget {
 
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Home()),
+                          MaterialPageRoute(builder: (context) => Home(indexInitial: 0)),
                         );
                       } else {
                         final snackBar = SnackBar(

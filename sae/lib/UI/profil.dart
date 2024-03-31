@@ -8,6 +8,8 @@ import 'package:sae/models/utilisateur.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'connexion.dart';
+
 class ProfilPage extends StatelessWidget {
   Future<void> _chargerInformationsUtilisateur() async {
     final pseudo = await SharedPreferences.getInstance().then((prefs) {
@@ -146,7 +148,7 @@ class ProfilPage extends StatelessWidget {
           InkWell(
             onTap: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => WidgetAnnonces()));
+                  MaterialPageRoute(builder: (context) => WidgetAnnonces ()));
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -188,6 +190,21 @@ class ProfilPage extends StatelessWidget {
             height: 1,
             color: Colors.grey,
           ),
+      ElevatedButton(
+        onPressed: () {
+          // Action de déconnexion
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Connexion()));
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.red, // Couleur du bouton
+          padding: EdgeInsets.symmetric(vertical: 16.0), // Espacement interne
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)), // Bordures arrondies
+        ),
+        child: Text(
+          'Se déconnecter',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+      ),
         ],
       ),
     );

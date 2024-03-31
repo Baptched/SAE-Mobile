@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:sae/UI/annonce.dart';
 import 'package:sae/database/sqflite/db_models/ProduitDB.dart';
 
+import '../database/sqflite/db_models/AnnonceDB.dart';
 import '../models/annonce.dart';
 import '../models/produit.dart';
 import 'home.dart';
@@ -26,7 +27,7 @@ class _WidgetAjoutAnnonceState extends State<WidgetAjoutAnnonce> {
   TextEditingController _dureeReservationController = TextEditingController();
 
   Future<void> _chargerProduits() async {
-    await ProduitDB.getProduitsDisponibles().then((value) =>
+    await ProduitDB.getProduitsNonAnnonces().then((value) =>
         setState(() {
           _produits = value;
         })
@@ -62,16 +63,24 @@ class _WidgetAjoutAnnonceState extends State<WidgetAjoutAnnonce> {
       ));
       return;
     }
+    if (_dureeReservationController.text == "0") {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('La durée maximale de réservation doit être supérieure à 0.'),
+      ));
+      return;
+    }
 
     Annonce annonce = Annonce(
       id : 0,
       titre : _titreAnnonceController.text,
       description : _descriptionAnnonceController.text,
       dureeReservationMax : int.parse(_dureeReservationController.text),
-      etat: "Disponible",
+      etat: "Non réservée",
       enLigne: 0,
       idProduit : _selectedProduit!.id as int,
     );
+
+    await AnnonceDB.insererAnnonce(annonce);
   }
 
   @override
@@ -146,7 +155,7 @@ class _WidgetAjoutAnnonceState extends State<WidgetAjoutAnnonce> {
                   _ajouterAnnonce().then((value) =>
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => AnnoncesPage()),
+                        MaterialPageRoute(builder: (context) => Home(indexInitial: 4)),
                       ),
                   );
                 },

@@ -6,6 +6,8 @@ import 'package:sae/database/sqflite/db_models/AnnonceDB.dart' as sqflite;
 import 'package:sae/database/sqflite/db_models/ProduitDB.dart' as sqflite;
 
 import 'package:sae/database/supabase/annonceDB.dart' as supabase;
+import 'package:sae/database/supabase/produitDB.dart' as supabase;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/annonce.dart';
 import '../models/produit.dart';
@@ -94,20 +96,37 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
 
   Future<void> _publierAnnonce(Annonce annonce, bool publier) async {
     if (publier){
-      //TODO: publier le produit associé avant a chaque fois... eh oui fallait mieux concevoir la base et la faire comme baptiste avait dit fdp
-      supabase.AnnonceDB.insererAnnonce(annonce);
+      Produit p = _produits!.firstWhere((element) => element.id == annonce.idProduit);
+      p.idUtilisateur = await SharedPreferences.getInstance()
+          .then((value) => value.getInt('idUtilConnecte'));
+
+      supabase.ProduitDB.insererProduit(p).then((value) =>
+          supabase.AnnonceDB.insererAnnonce(annonce, value));
+
+      annonce.enLigne = 1;
+      await sqflite.AnnonceDB.updateAnnonce(annonce);
+
     }
     else{
-      supabase.AnnonceDB.deleteAnnonceByAttributs(annonce);
+      //TODO: supprimer ses réservations avant
+      Annonce? annonceEnLigne = await supabase.AnnonceDB.getAnnonceByAttributs(annonce);
+
+
+      supabase.ProduitDB.deleteProduitById(annonceEnLigne!.idProduit);
+      supabase.AnnonceDB.deleteAnnonceById(annonceEnLigne.id as int);
     }
     setState(() {
       annonce.enLigne = publier ? 1 : 0;
     });
+    await sqflite.AnnonceDB.updateAnnonce(annonce);
   }
 
   Future<void> _supprimerAnnonce(Annonce annonce) async {
     if (annonce.enLigne == 1){
+
+      Annonce? a = await supabase.AnnonceDB.getAnnonceByAttributs(annonce);
       await supabase.AnnonceDB.deleteAnnonceByAttributs(annonce);
+      await supabase.ProduitDB.deleteProduitById(a!.idProduit);
       await sqflite.AnnonceDB.deleteAnnonce(annonce.id as int);
     }
     else {
@@ -148,7 +167,7 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text('Liste des annonces'),
+        title: Text('Liste de vos annonces'),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -159,7 +178,7 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
               Center(child: CircularProgressIndicator())
             else if (_annonces!.isEmpty)
               Center(
-                child: Text('Aucune annonce disponible.'),
+                child: Text('Vous n\'avez aucune annonce enregistrée.'),
               )
             else
               SizedBox(height: 8.0),

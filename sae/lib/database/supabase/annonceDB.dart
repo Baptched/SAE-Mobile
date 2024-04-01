@@ -25,7 +25,40 @@ class AnnonceDB {
     return annonces;
   }
 
-  static Future<int> insererAnnonce(Annonce annonce) async
+  // get annonce by attributs
+  static Future<Annonce?> getAnnonceByAttributs(Annonce annonce) async {
+    final data = await MyApp.client
+        .from('annonce')
+        .select()
+        .eq('titrea', annonce.titre)
+        .eq('descriptiona', annonce.description)
+        .eq('dureereservation', annonce.dureeReservationMax);
+    if (data.isEmpty) {
+      return null;
+    }
+    return Annonce.fromJson(data[0]);
+  }
+
+  /// get id annonce by attributs
+  static Future<int?> getIdAnnonceByAttributs(Annonce annonce) async {
+    final data = await MyApp.client
+        .from('annonce')
+        .select('ida')
+        .eq('titrea', annonce.titre)
+        .eq('descriptiona', annonce.description)
+        .eq('dureereservation', annonce.dureeReservationMax);
+    if (data.isEmpty) {
+      return null;
+    }
+    return data[0]['ida'] as int;
+  }
+
+
+
+  /// L'id du produit associé à l'annonce est passé en paramètre
+  /// Il faut le passer car par défaut le modèle à l'id du produit de la base locale
+  /// or ici nous avons besoin de l'id du produit de la base distante
+  static Future<int> insererAnnonce(Annonce annonce, int idProduitSupabase) async
   {
     final response = await MyApp.client
         .from('annonce')
@@ -34,12 +67,17 @@ class AnnonceDB {
       'descriptiona': annonce.description,
       'dureereservation': annonce.dureeReservationMax,
       'etata': annonce.etat,
-      'idp': annonce.idProduit,
+      'idp': idProduitSupabase,
 
     }
     ]);
-    // return id of the created object
-    return response.data[0]['ida'];
+
+    int? idA = await AnnonceDB.getIdAnnonceByAttributs(annonce);
+    if (idA == null) {
+      return -1;
+    }
+    print("id A :${idA}");
+    return idA;
   }
 
   static Future<void> deleteAnnonceById(int id) async {

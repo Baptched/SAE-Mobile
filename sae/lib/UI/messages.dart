@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:sae/UI/detail_message.dart';
 
@@ -9,7 +8,6 @@ class MessagesPage extends StatelessWidget {
     'Samuel',
     'Seb',
     'Gael',
-    // Ajoutez d'autres noms si nécessaire
   ];
 
   final List<String> messages = [
@@ -18,18 +16,23 @@ class MessagesPage extends StatelessWidget {
     'j\'ai pas de stage gros c la merde',
     'Kyyyyyyyyyyyyyyyyks',
     'Oui j\'ai mangé une morbiflette a 6 000 calories et alors ?',
-    // Ajoutez d'autres messages si nécessaire
   ];
 
-  final Random random = Random();
+  final List<int> nbAnnonces = [
+    0,
+    2,
+    3,
+    1,
+    0,
+  ];
 
-  String getRandomHour() {
-    return '${random.nextInt(24).toString().padLeft(2, '0')}:${random.nextInt(60).toString().padLeft(2, '0')}';
-  }
-
-  int getRandomNumberOfAds() {
-    return random.nextInt(5); // Génère un nombre aléatoire entre 0 et 4
-  }
+  final List<String> heures = [
+    '12:47',
+    '13:01',
+    '20:23',
+    '3:40',
+    '16:59',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -53,17 +56,15 @@ class MessagesPage extends StatelessWidget {
       ),
       body: ListView.separated(
         itemCount: noms.length,
-        separatorBuilder: (context, index) => Divider(), // Ajoutez un séparateur entre chaque conversation
+        separatorBuilder: (context, index) => Divider(),
         itemBuilder: (context, index) {
           final nom = noms[index];
           final message = messages[index];
-          final heure = getRandomHour();
-          final nombreAnnonces = getRandomNumberOfAds();
+          final heure = heures[index];
+          final nombreAnnonces = nbAnnonces[index];
           return GestureDetector(
             onTap: () {
-              // Action à effectuer lors du tap sur la conversation
               Navigator.push(context, MaterialPageRoute(builder: (context) => ConversationWidget()));
-              // Vous pouvez naviguer vers une autre page ici
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -85,7 +86,7 @@ class MessagesPage extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             SizedBox(width: 8.0),
-                            Text('$nombreAnnonces annonces'), // Nombre aléatoire d'annonces à côté du prénom
+                            Text('$nombreAnnonces annonces'),
                           ],
                         ),
                         SizedBox(height: 4.0),
@@ -106,7 +107,6 @@ class MessagesPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Action pour composer un nouveau message
         },
         child: Icon(Icons.message),
       ),

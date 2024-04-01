@@ -15,9 +15,11 @@ class ConversationWidget extends StatelessWidget {
               padding: EdgeInsets.all(16.0),
               children: [
                 // Messages dans la conversation
-                MessageBubble(isSentByMe: false, message: 'Salut ! Comment ça va ?'),
-                MessageBubble(isSentByMe: true, message: 'Salut ! Ça va bien, et toi ?'),
-                MessageBubble(isSentByMe: false, message: 'Ça va super, merci !'),
+                MessageBubble(isSentByMe: false, message:  'j\'ai farmé 4000 trophées\n sur brawlstars en un weekend !!!'),
+                SizedBox(height: 8.0),
+                MessageBubble(isSentByMe: true, message: 'ah ouais ? Moi je suis nul j\'ai pas vu \nle GoRouter en cours avec Mr Nguyen'),
+                SizedBox(height: 8.0),
+                MessageBubble(isSentByMe: false, message: 'Kylian est trop un bon développeur\n en flutter ca fait plaisir de ouf'),
                 // Ajoutez d'autres messages ici
               ],
             ),

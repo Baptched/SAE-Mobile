@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:io'; // Pour File
+import 'package:path/path.dart' as p;
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart'; // Importez le package path_provider
+import 'package:sae/database/sqflite/db_models/ProduitDB.dart';
+
+import '../models/produit.dart';
 
 class PageAjoutProduit extends StatefulWidget {
+
+  final Function() refresh;
+
+  PageAjoutProduit({Key ?key, required this.refresh}) : super(key: key);
+
   @override
   _PageAjoutProduitState createState() => _PageAjoutProduitState();
 }
@@ -29,6 +39,44 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
     setState(() {
       _imageProduit = null;
     });
+  }
+
+  Future<void> _ajouterProduit() async {
+
+    print( _imageProduit != null ? _imageProduit!.path : 'default_produit_image.png');
+
+    String nomImage = 'default_produit_image.png';
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      if ( _imageProduit != null ){
+        print(p.basename(_imageProduit!.path));
+        final repertoire = await getApplicationDocumentsDirectory();
+        nomImage = p.basename(_imageProduit!.path);
+
+
+        final newPath = p.join(
+            repertoire.path, 'sae_mobile_product_img', nomImage);
+        print(newPath);
+        final newDirectory = Directory(p.dirname(newPath));
+        print(newDirectory);
+        if (!newDirectory.existsSync()) {
+          newDirectory.createSync(recursive: true);
+        }
+        _imageProduit!.copy(newPath);
+      }
+
+      Produit produit = Produit(
+        id: 0,
+        label: _label,
+        condition: _condition,
+        disponible: _disponible ? 1 : 0,
+        lienImageProduit: nomImage,
+      );
+
+      await ProduitDB.insererProduit(produit).then((value) =>
+        widget.refresh());
+    }
   }
 
   @override
@@ -78,15 +126,17 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
                 onPressed: _choisirImage,
                 child: Text('Ajouter une image'),
               ),
+              SizedBox(height: 16.0),
               if (_imageProduit != null)
                 Container(
-                  height: 200,
-                  width: 200,// Taille de la prévisualisation de l'image
+                  constraints: BoxConstraints(
+                    maxHeight: 250,
+                    maxWidth: 200,
+                  ), // Taille de la prévisualisation de l'image
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.0),
                     image: DecorationImage(
                       image: FileImage(_imageProduit!),
-                      fit: BoxFit.cover,
                     ),
                   ),
                   child: Stack(
@@ -104,7 +154,9 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
               Spacer(),
               ElevatedButton(
                 onPressed: () {
-                  // Assurez-vous de valider et sauvegarder les informations du formulaire avant de procéder
+                  _ajouterProduit().then((value) =>
+                    Navigator.pop(context)
+                  );
                 },
                 child: Text('Ajouter'),
               ),

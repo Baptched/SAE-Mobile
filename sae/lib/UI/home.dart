@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:sae/database/sqflite/database.dart';
 import 'annonce.dart';
 import 'favorie.dart';
-import 'ajout.dart';
+import 'ajout_annonce.dart';
 import 'messages.dart';
 import 'profil.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart'; // Importez le package path_provider pour utiliser getApplicationDocumentsDirectory()
+
 
 class Home extends StatefulWidget {
+
+  static late String lienDossierImagesLocal;
+  final int indexInitial;
+
+  Home({required this.indexInitial});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -17,7 +26,7 @@ class _HomePageState extends State<Home> {
   static List<Widget> _widgetOptions = <Widget>[
     AnnoncesPage(),
     FavorisPage(),
-    AjoutPage(),
+    WidgetAjoutAnnonce(),
     MessagesPage(),
     ProfilPage(),
   ];
@@ -26,6 +35,18 @@ class _HomePageState extends State<Home> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initialiser();
+    _selectedIndex = widget.indexInitial;
+  }
+
+  Future<void> _initialiser() async {
+    Home.lienDossierImagesLocal = await obtenirLienDossierImagesLocal();
+    print(Home.lienDossierImagesLocal);
   }
 
   @override
@@ -61,5 +82,10 @@ class _HomePageState extends State<Home> {
         onTap: _onItemTapped,
       ),
     );
+  }
+
+  Future<String> obtenirLienDossierImagesLocal() async {
+    final String directory = (await getApplicationDocumentsDirectory()).path;
+    return p.join(directory, 'sae_mobile_product_img');
   }
 }

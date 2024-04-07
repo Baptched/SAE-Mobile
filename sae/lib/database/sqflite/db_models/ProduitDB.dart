@@ -32,6 +32,46 @@ class ProduitDB {
     });
   }
 
+  /**
+   * Renvoie tous les produits qui sont disponibles
+   */
+  static Future<List<Produit>> getProduitsDisponibles() async {
+    final Database db = await DatabaseHelper().database;
+    final List<Map<String, dynamic>> maps = await db.query('produit', where: 'disponible = ?', whereArgs: [1]);
+    return List.generate(maps.length, (i) {
+      return Produit(
+        id: maps[i]['idP'],
+        label: maps[i]['labelP'],
+        condition: maps[i]['conditionP'],
+        disponible: maps[i]['disponible'],
+        lienImageProduit: maps[i]['lienImageProduit'],
+      );
+    });
+  }
+
+  /**
+   * Renvoie tous les produits qui ne sont pas dans une annonce
+   *
+   */
+  static Future<List<Produit>> getProduitsNonAnnonces() async {
+    final Database db = await DatabaseHelper().database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT * FROM produit
+      WHERE idP NOT IN (
+        SELECT idP FROM annonce
+      )
+    ''');
+    return List.generate(maps.length, (i) {
+      return Produit(
+        id: maps[i]['idP'],
+        label: maps[i]['labelP'],
+        condition: maps[i]['conditionP'],
+        disponible: maps[i]['disponible'],
+        lienImageProduit: maps[i]['lienImageProduit'],
+      );
+    });
+}
+
   static Future<Produit> insererProduit(Produit produit) async {
     final Database db = await DatabaseHelper().database;
     produit.id = await db.insert('produit', {

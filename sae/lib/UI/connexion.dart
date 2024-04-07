@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:sae/UI/inscription.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:sae/models/utilisateur.dart';
-import 'package:supabase/supabase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 
 class Connexion extends StatelessWidget {
+
+  const Connexion({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,6 @@ class Connexion extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const SizedBox(height: 20),
               Text(
                 'Connexion',
                 textAlign: TextAlign.center,
@@ -62,8 +62,8 @@ class Connexion extends StatelessWidget {
 
                       // Interrogation de la base de données pour vérifier l'utilisateur
                       Utilisateur? u = await UtilisateurDB
-                            .getUtilisateurByPseudoAndMotDePasse(
-                            nomUtilisateur, motDePasse);
+                          .getUtilisateurByPseudoAndMotDePasse(
+                          nomUtilisateur, motDePasse);
 
                       if (u != null) {
                         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -73,7 +73,7 @@ class Connexion extends StatelessWidget {
 
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Home()),
+                          MaterialPageRoute(builder: (context) => Home(indexInitial: 0),),
                         );
                       } else {
                         final snackBar = SnackBar(

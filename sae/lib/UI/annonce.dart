@@ -83,7 +83,7 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
                       return ListTile(
                         title: Text(annonce.titre),
                         subtitle: Text(
-                            'Durée: ${annonce.duree} jours\nÉtat: ${annonce.etat}'),
+                            'Durée: ${annonce.dureeReservationMax} jours\nÉtat: ${annonce.etat}'),
                         // Vous pouvez ajouter d'autres éléments d'annonce ici
                       );
                     },

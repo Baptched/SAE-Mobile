@@ -1,11 +1,12 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:sae/UI/mes_annonces.dart';
 import 'package:sae/UI/produits.dart';
 import 'package:sae/models/utilisateur.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sae/UI/connexion.dart';
 
 class ProfilPage extends StatefulWidget {
   @override
@@ -38,7 +39,6 @@ class _ProfilPageState extends State<ProfilPage> {
     if (pseudo != null) {
       _pseudo = pseudo;
     }
-    // Récupérer les informations de l'utilisateur depuis la base de données
     try {
       final utilisateur = await UtilisateurDB.getUtilisateurByPseudo(_pseudo);
       if (utilisateur != null) {
@@ -73,7 +73,7 @@ class _ProfilPageState extends State<ProfilPage> {
           ),
           InkWell(
             onTap: () {
-              // Ajoutez votre action ici
+              // Pour l'action : voir mon profil / le modifier ( jsp si on le fera )
             },
             child: Container(
               padding: EdgeInsets.all(16.0),
@@ -136,13 +136,14 @@ class _ProfilPageState extends State<ProfilPage> {
               ),
             ),
           ),
-          Divider(
+       Divider(
             height: 1,
             color: Colors.grey,
           ),
           InkWell(
             onTap: () {
-              // Ajoutez votre action ici
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => WidgetAnnonces()));
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -183,6 +184,25 @@ class _ProfilPageState extends State<ProfilPage> {
           Divider(
             height: 1,
             color: Colors.grey,
+          ),
+      SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 120.0),
+            child: ElevatedButton(
+              onPressed: () {
+                // Action de déconnexion
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Connexion()));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Couleur de fond
+                padding: EdgeInsets.symmetric(vertical: 16.0), // Espacement interne
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)), // Bordures arrondies
+              ),
+              child: Text(
+                'Se déconnecter',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
           ),
         ],
       ),

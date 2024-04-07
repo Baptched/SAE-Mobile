@@ -2,15 +2,19 @@ class Annonce{
 
   int? id;
   String titre;
-  int duree;
+  String description;
+  int dureeReservationMax;
   String etat;
+  int enLigne;
   int idProduit;
 
   Annonce({
     this.id,
     required this.titre,
-    required this.duree,
+    required this.description,
+    required this.dureeReservationMax,
     required this.etat,
+    required this.enLigne,
     required this.idProduit,
   });
 
@@ -18,8 +22,10 @@ class Annonce{
     return Annonce(
       id: json['ida'],
       titre: json['titrea'],
-      duree: json['dureereservation'],
+      description: json['descriptiona'],
+      dureeReservationMax: json['dureereservation'],
       etat: json['etata'],
+      enLigne: json['enligne'],
       idProduit: json['idp'],
     );
   }

@@ -1,7 +1,10 @@
+import 'dart:ffi';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:convert/convert.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Utilisateur {
   final int id;
@@ -9,7 +12,9 @@ class Utilisateur {
   final String nom;
   final String pseudo;
   final String motDePasse;
-  final Uint8List? imageProfilBytes;
+  final String? imageProfilBytes;
+  final Uint8List? imageUint8List ;
+  final XFile? image;
 
   Utilisateur({
     required this.id,
@@ -18,31 +23,21 @@ class Utilisateur {
     required this.pseudo,
     required this.motDePasse,
     this.imageProfilBytes,
+    this.imageUint8List,
+    this.image
   });
 
   static Utilisateur fromJson(Map<String, dynamic> json) {
-    // convert base 64 string to bytes
-    Uint8List? tableauBits;
-    // print the type of json['imageprofil']
-    print(json['imageprofil'].runtimeType);
-    if (json['imageprofil'] != null) {
-      String hex = json['imageprofil'];
-      String hexStr = hex.replaceAll('\\x', '');
-      List<int> bytes = [];
-      for (int i = 0; i < hexStr.length; i += 2) {
-        String byteString = hexStr.substring(i, i + 2);
-        bytes.add(int.parse(byteString, radix: 16));
-      }
-      tableauBits = Uint8List.fromList(bytes);
-    }
-
+    String hexDecode = json['imageprofil'].toString().substring(2);
     return Utilisateur(
+      // Définir les autres attributs selon les besoins
       id: json['idu'],
       prenom: json['prenomu'],
       nom: json['nomu'],
       pseudo: json['pseudo'],
       motDePasse: json['motdepasse'],
-      imageProfilBytes: tableauBits,
+      imageProfilBytes: json['imageprofil'],
+      imageUint8List: Uint8List.fromList(hex.decode(hexDecode))
     );
   }
 

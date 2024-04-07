@@ -7,8 +7,31 @@ import 'package:sae/models/utilisateur.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfilPage extends StatelessWidget {
+class ProfilPage extends StatefulWidget {
+  @override
+  _ProfilPageState createState() => _ProfilPageState();
+}
+
+class _ProfilPageState extends State<ProfilPage> {
+  late String _pseudo = '';
+  late Utilisateur _utilisateur = Utilisateur(
+    id: 0,
+    nom: '',
+    prenom: '',
+    pseudo: '',
+    motDePasse: '',
+  );
+
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _chargerInformationsUtilisateur();
+  }
+
   Future<void> _chargerInformationsUtilisateur() async {
+    // Récupérer le pseudo de l'utilisateur connecté
     final pseudo = await SharedPreferences.getInstance().then((prefs) {
       return prefs.getString('pseudoUtilConnecte');
     });
@@ -19,34 +42,18 @@ class ProfilPage extends StatelessWidget {
     try {
       final utilisateur = await UtilisateurDB.getUtilisateurByPseudo(_pseudo);
       if (utilisateur != null) {
-        _utilisateur = utilisateur;
+        setState(() {
+          _utilisateur = utilisateur;
+          _isLoading = false; // Marque le chargement comme terminé
+        });
       }
     } catch (e) {
       print('Erreur lors de la récupération des informations utilisateur: $e');
     }
   }
 
-  late String _pseudo = '';
-  late Utilisateur _utilisateur = Utilisateur(
-    id: 0,
-    nom: '',
-    prenom: '',
-    pseudo: '',
-    motDePasse: '',
-  );
-
-  ProfilPage() {
-    _chargerInformationsUtilisateur();
-  }
-
   @override
   Widget build(BuildContext context) {
-    print(_utilisateur.imageProfilBytes);
-    // print the type of imageProfilbytes
-    print(_utilisateur.imageProfilBytes.runtimeType);
-
-    print(_utilisateur.imageProfilBytes?.lengthInBytes);
-
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -72,23 +79,15 @@ class ProfilPage extends StatelessWidget {
               padding: EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey, // Default background color
-                      image: _utilisateur.imageProfilBytes != null
-                      // If there’s a profile image, use it
-                          ? DecorationImage(
-                        image: MemoryImage(_utilisateur.imageProfilBytes!),
-                        fit: BoxFit.cover,
-                      )
-                      // Else, use a default image from assets
-                          : DecorationImage(
-                        image: AssetImage('assets/user_img/default_user_image.png'),
-                        fit: BoxFit.cover,
-                      ),
+                  _isLoading
+                      ? CircularProgressIndicator() // Indicateur de chargement
+                      : ClipRRect(
+                    borderRadius: BorderRadius.circular(50),
+                    child: Image.memory(
+                      _utilisateur.imageUint8List ?? Uint8List(0),
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
                     ),
                   ),
                   SizedBox(width: 16),
@@ -96,7 +95,7 @@ class ProfilPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _utilisateur.pseudo, // Remplacez par le pseudo de l'utilisateur
+                        _utilisateur.pseudo,
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8),
@@ -121,8 +120,7 @@ class ProfilPage extends StatelessWidget {
           ),
           InkWell(
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => WidgetProduits()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => WidgetProduits()));
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),

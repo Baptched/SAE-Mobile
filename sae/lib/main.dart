@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:sae/UI/connexion.dart';
-import 'package:sae/database/supabase/utilisateurDB.dart';
+import './UI/connexion.dart';
 import 'package:supabase/supabase.dart';
 
 void main() {
@@ -20,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Connexion(supabase : client),
+      home: Connexion()
     );
   }
 }

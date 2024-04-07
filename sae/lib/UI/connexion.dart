@@ -7,9 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 
 class Connexion extends StatelessWidget {
-  final SupabaseClient supabase;
-
-  const Connexion({Key? key, required this.supabase}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +20,7 @@ class Connexion extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              const SizedBox(height: 20),
               Text(
                 'Connexion',
                 textAlign: TextAlign.center,
@@ -91,7 +89,7 @@ class Connexion extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Inscription(supabase: supabase)),
+                        MaterialPageRoute(builder: (context) => Inscription()),
                       );
                     },
                     child: const Text('Inscription'),

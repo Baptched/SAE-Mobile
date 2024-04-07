@@ -1,11 +1,13 @@
+import 'dart:typed_data';
+
+import 'package:convert/convert.dart';
 import 'package:sae/main.dart';
 import 'package:sae/models/utilisateur.dart';
 class UtilisateurDB {
 
-
-
   static Future<void> insererUtilisateur(Utilisateur utilisateur) async {
-
+    Uint8List imageByte = await utilisateur.image!.readAsBytes();
+    String hexEncoded = hex.encode(imageByte); 
     await MyApp.client
         .from('utilisateur')
         .insert([
@@ -14,7 +16,7 @@ class UtilisateurDB {
         'prenomu': utilisateur.prenom,
         'pseudo': utilisateur.pseudo,
         'motdepasse': utilisateur.motDePasse,
-        'imageprofil': utilisateur.imageProfilBytes,
+        'imageprofil': '\\x$hexEncoded',
       }
     ]);
   }
@@ -29,10 +31,8 @@ class UtilisateurDB {
     if (data.isEmpty) {
       return null;
     }
-    print(data[0]);
+
     return Utilisateur.fromJson(data[0]);
-
-
   }
 
   static Future<Utilisateur?> getUtilisateurById(int id) async {
@@ -40,11 +40,9 @@ class UtilisateurDB {
         .from('utilisateur')
         .select()
         .eq('id', id);
-
     if (data.isEmpty) {
       return null;
     }
-
     return Utilisateur.fromJson(data[0]);
   }
 
@@ -54,13 +52,9 @@ class UtilisateurDB {
         .select()
         .eq('pseudo', pseudo)
         .eq('motdepasse', motDePasse);
-
-    print(data);
     if (data.isEmpty) {
       return null;
     }
-
-
     return Utilisateur.fromJson(data[0]);
   }
 
@@ -68,9 +62,7 @@ class UtilisateurDB {
     final data = await MyApp.client
         .from('utilisateur')
         .select();
-
     List<Utilisateur> utilisateurs = [];
-
     for (var utilisateur in data) {
       utilisateurs.add(Utilisateur.fromJson(utilisateur));
     }
@@ -108,6 +100,4 @@ class UtilisateurDB {
         .from('utilisateur')
         .delete();
   }
-
-
 }

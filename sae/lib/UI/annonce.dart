@@ -55,7 +55,7 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
                   style: TextStyle(
                     fontSize: 29,
                     fontWeight: FontWeight.bold,
-                  ),
+                  )
                 ),
                 SizedBox(height: 10),
                 Divider(thickness: 4),

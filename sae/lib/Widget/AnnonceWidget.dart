@@ -4,6 +4,9 @@ import 'package:sae/models/produit.dart';
 import 'package:sae/database/supabase/produitDB.dart';
 import 'package:sae/models/utilisateur.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sae/database/supabase/favDB.dart';
+import 'package:sae/UI/detail_annonce.dart';
 
 class AnnonceWidget extends StatefulWidget {
   final Annonce annonce;
@@ -29,12 +32,19 @@ class _AnnonceWidgetState extends State<AnnonceWidget> {
 
   Future<void> chargerProduitEtUtilisateur() async {
     try {
+      int? idUser = await SharedPreferences.getInstance().then((prefs) {
+        return prefs.getInt('idUtilConnecte');
+      });
+
+      _isLiked =
+          await FavDB.isAnnonceLiked(widget.annonce.id ?? 0, idUser ?? 0);
+      _likesCount = await FavDB.getLikesCount(widget.annonce.id ?? 0);
       _produit = await ProduitDB.getProduitById(widget.annonce.idProduit);
       while (_produit == null) {
         await Future.delayed(Duration(seconds: 1));
       }
       _utilisateur =
-      await UtilisateurDB.getUtilisateurById(_produit!.idUtilisateur??0);
+          await UtilisateurDB.getUtilisateurById(_produit!.idUtilisateur ?? 0);
     } catch (e) {
       print('Erreur lors du chargement des informations : $e');
     } finally {
@@ -49,8 +59,20 @@ class _AnnonceWidgetState extends State<AnnonceWidget> {
     return _isLoading
         ? CircularProgressIndicator()
         : _produit != null && _utilisateur != null
-        ? buildAnnonceWidget()
-        : SizedBox(); // Placeholder Widget when data is not yet loaded
+            ? GestureDetector(
+                // Wrap AnnonceWidget in GestureDetector
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DetailAnnonce(annonce: widget.annonce, produit: _produit!, utilisateur: _utilisateur!, isLiked: _isLiked, likesCount: _likesCount)
+                    ),
+                  );
+                },
+                child: buildAnnonceWidget(),
+              )
+            : SizedBox(); // Placeholder Widget when data is not yet loaded
   }
 
   Widget buildAnnonceWidget() {
@@ -70,8 +92,7 @@ class _AnnonceWidgetState extends State<AnnonceWidget> {
                         : null,
                   ),
                   title: Text(widget.annonce.titre),
-                  subtitle:
-                  Text('Publié par: ${_utilisateur?.pseudo ?? ""}'),
+                  subtitle: Text('Publié par: ${_utilisateur?.pseudo ?? ""}'),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -90,7 +111,20 @@ class _AnnonceWidgetState extends State<AnnonceWidget> {
                         _isLiked ? Icons.favorite : Icons.favorite_border,
                         color: _isLiked ? Colors.red : null,
                       ),
-                      onPressed: () {
+                      onPressed: () async {
+                        int? idUser =
+                            await SharedPreferences.getInstance().then((prefs) {
+                          return prefs.getInt('idUtilConnecte');
+                        });
+                        while (idUser == null) {
+                          await Future.delayed(Duration(seconds: 1));
+                          idUser = await SharedPreferences.getInstance()
+                              .then((prefs) {
+                            return prefs.getInt('idUtilConnecte');
+                          });
+                        }
+                        FavDB.likeUnLikeAnnonce(
+                            widget.annonce.id ?? 0, idUser ?? 0);
                         setState(() {
                           _isLiked = !_isLiked;
                           if (_isLiked) {
@@ -113,12 +147,12 @@ class _AnnonceWidgetState extends State<AnnonceWidget> {
               padding: const EdgeInsets.all(8.0),
               child: _produit!.imageUint8List != null
                   ? SizedBox(
-                width: 150.0, // Ajustez la largeur selon vos besoins
-                child: Image.memory(
-                  _produit!.imageUint8List!,
-                  fit: BoxFit.cover, // ou tout autre ajustement souhaité
-                ),
-              )
+                      width: 150.0, // Ajustez la largeur selon vos besoins
+                      child: Image.memory(
+                        _produit!.imageUint8List!,
+                        fit: BoxFit.cover, // ou tout autre ajustement souhaité
+                      ),
+                    )
                   : SizedBox(), // Placeholder if no image
             ),
           ),

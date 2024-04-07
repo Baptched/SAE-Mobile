@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sae/database/supabase/annonceDB.dart';
 import 'package:sae/models/annonce.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sae/Widget/AnnonceWidget.dart';
 
 class AnnoncesPage extends StatefulWidget {
   @override
@@ -73,19 +74,14 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
                   );
                 } else if (snapshot.hasError) {
                   return Center(
-                    child: Text('Erreur: ${snapshot.error}'),
+                    child: Text('Erreeeeur: ${snapshot.error}'),
                   );
                 } else if (snapshot.hasData) {
                   return ListView.builder(
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       Annonce annonce = snapshot.data![index];
-                      return ListTile(
-                        title: Text(annonce.titre),
-                        subtitle: Text(
-                            'Durée: ${annonce.dureeReservationMax} jours\nÉtat: ${annonce.etat}'),
-                        // Vous pouvez ajouter d'autres éléments d'annonce ici
-                      );
+                      return AnnonceWidget(annonce: annonce);
                     },
                   );
                 } else {

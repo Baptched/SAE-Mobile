@@ -1,17 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'dart:io'; // Pour File
 import 'package:path/path.dart' as p;
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart'; // Importez le package path_provider
+import 'package:path_provider/path_provider.dart';
 import 'package:sae/database/sqflite/db_models/ProduitDB.dart';
-
 import '../models/produit.dart';
 
 class PageAjoutProduit extends StatefulWidget {
-
   final Function() refresh;
 
-  PageAjoutProduit({Key ?key, required this.refresh}) : super(key: key);
+  PageAjoutProduit({Key? key, required this.refresh}) : super(key: key);
 
   @override
   _PageAjoutProduitState createState() => _PageAjoutProduitState();
@@ -42,24 +41,15 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
   }
 
   Future<void> _ajouterProduit() async {
-
-    print( _imageProduit != null ? _imageProduit!.path : 'default_produit_image.png');
-
     String nomImage = 'default_produit_image.png';
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      if ( _imageProduit != null ){
-        print(p.basename(_imageProduit!.path));
+      if (_imageProduit != null) {
         final repertoire = await getApplicationDocumentsDirectory();
         nomImage = p.basename(_imageProduit!.path);
-
-
-        final newPath = p.join(
-            repertoire.path, 'sae_mobile_product_img', nomImage);
-        print(newPath);
+        final newPath = p.join(repertoire.path, 'sae_mobile_product_img', nomImage);
         final newDirectory = Directory(p.dirname(newPath));
-        print(newDirectory);
         if (!newDirectory.existsSync()) {
           newDirectory.createSync(recursive: true);
         }
@@ -74,8 +64,7 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
         lienImageProduit: nomImage,
       );
 
-      await ProduitDB.insererProduit(produit).then((value) =>
-        widget.refresh());
+      await ProduitDB.insererProduit(produit).then((value) => widget.refresh());
     }
   }
 
@@ -109,7 +98,7 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
               Text('Condition de l\'objet', style: TextStyle(fontSize: 16.0)),
               DropdownButtonFormField<String>(
                 value: _condition,
-                items: <String>['Neuf', 'Très bon état', 'Bon état','Etat moyen', 'Abîmé'].map((String value) {
+                items: <String>['Neuf', 'Très bon état', 'Bon état', 'Etat moyen', 'Abîmé'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -132,11 +121,12 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
                   constraints: BoxConstraints(
                     maxHeight: 250,
                     maxWidth: 200,
-                  ), // Taille de la prévisualisation de l'image
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.0),
                     image: DecorationImage(
                       image: FileImage(_imageProduit!),
+                      fit: BoxFit.cover,
                     ),
                   ),
                   child: Stack(
@@ -154,9 +144,7 @@ class _PageAjoutProduitState extends State<PageAjoutProduit> {
               Spacer(),
               ElevatedButton(
                 onPressed: () {
-                  _ajouterProduit().then((value) =>
-                    Navigator.pop(context)
-                  );
+                  _ajouterProduit().then((value) => Navigator.pop(context));
                 },
                 child: Text('Ajouter'),
               ),

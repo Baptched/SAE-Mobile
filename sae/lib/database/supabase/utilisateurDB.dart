@@ -36,10 +36,11 @@ class UtilisateurDB {
   }
 
   static Future<Utilisateur?> getUtilisateurById(int id) async {
+    print(id);
     final data = await MyApp.client
         .from('utilisateur')
         .select()
-        .eq('id', id);
+        .eq('idu', id);
     if (data.isEmpty) {
       return null;
     }

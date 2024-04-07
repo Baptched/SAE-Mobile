@@ -100,9 +100,10 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
       p.idUtilisateur = await SharedPreferences.getInstance()
           .then((value) => value.getInt('idUtilConnecte'));
 
-      supabase.ProduitDB.insererProduit(p).then((value) =>
-          supabase.AnnonceDB.insererAnnonce(annonce, value));
+      print("_produits" + p.toString());
 
+
+      supabase.ProduitDB.insererProduit(p).then((value) => supabase.AnnonceDB.insererAnnonce(annonce, value));
       annonce.enLigne = 1;
       await sqflite.AnnonceDB.updateAnnonce(annonce);
 
@@ -110,7 +111,6 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
     else{
       //TODO: supprimer ses réservations avant
       Annonce? annonceEnLigne = await supabase.AnnonceDB.getAnnonceByAttributs(annonce);
-
 
       supabase.ProduitDB.deleteProduitById(annonceEnLigne!.idProduit);
       supabase.AnnonceDB.deleteAnnonceById(annonceEnLigne.id as int);

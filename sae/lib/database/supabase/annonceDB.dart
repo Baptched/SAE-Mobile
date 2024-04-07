@@ -9,7 +9,8 @@ class AnnonceDB {
         .select();
     List<Annonce> annonces = [];
     for (var d in data) {
-      annonces.add(Annonce.fromJson(d));
+      print(d);
+      annonces.add(Annonce.fromJsonSupabase(d));
     }
     return annonces;
   }
@@ -19,8 +20,9 @@ class AnnonceDB {
         .from('annonce')
         .select();
     List<Annonce> annonces = [];
+    print(data) ;
     for (var d in data) {
-      annonces.add(Annonce.fromJson(d));
+      annonces.add(Annonce.fromJsonSupabase(d));
     }
     return annonces;
   }
@@ -36,7 +38,7 @@ class AnnonceDB {
     if (data.isEmpty) {
       return null;
     }
-    return Annonce.fromJson(data[0]);
+    return Annonce.fromJsonSupabase(data[0]);
   }
 
   /// get id annonce by attributs

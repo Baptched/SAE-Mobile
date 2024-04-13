@@ -15,6 +15,34 @@ class AnnonceDB {
     return annonces;
   }
 
+  static Future<List<Annonce>> getAnnoncesFavorisByIdUtilisateur(int idu) async {
+    final data = await MyApp.client
+        .from('Favoris')
+        .select()
+        .eq('idu', idu);
+    List<Annonce> annonces = [];
+    for (var fav in data) {
+      final annonce = await MyApp.client
+          .from('annonce')
+          .select()
+          .eq('ida', fav['ida']);
+      annonces.add(Annonce.fromJsonSupabase(annonce[0]));
+    }
+    return annonces;
+  }
+
+  static Future<List<Annonce>> getAnnoncesFavorisByPseudoUtil(String pseudo) async {
+    final data = await MyApp.client
+        .from('utilisateur')
+        .select()
+        .eq('pseudo', pseudo);
+    if (data.isEmpty) {
+      return [];
+    }
+    final idu = data[0]['idu'];
+    return getAnnoncesFavorisByIdUtilisateur(idu);
+  }
+
   static Future<List<Annonce>> getAnnonces() async {
     final data = await MyApp.client
         .from('annonce')

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sae/database/sqflite/database.dart';
 import 'annonce.dart';
-import 'favorie.dart';
+import 'favoris.dart';
 import 'ajout_annonce.dart';
 import 'messages.dart';
 import 'profil.dart';
@@ -25,7 +25,7 @@ class _HomePageState extends State<Home> {
 
   static List<Widget> _widgetOptions = <Widget>[
     AnnoncesPage(),
-    FavorisPage(),
+    AnnoncesFavoritesPage(),
     WidgetAjoutAnnonce(),
     MessagesPage(),
     ProfilPage(),

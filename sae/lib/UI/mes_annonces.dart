@@ -104,7 +104,9 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
 
 
       supabase.ProduitDB.insererProduit(p).then((value) => supabase.AnnonceDB.insererAnnonce(annonce, value));
-      annonce.enLigne = 1;
+      setState(() {
+        annonce.enLigne = 1;
+      });
       await sqflite.AnnonceDB.updateAnnonce(annonce);
 
     }
@@ -125,8 +127,10 @@ class _WidgetAnnoncesState extends State<WidgetAnnonces> {
     if (annonce.enLigne == 1){
 
       Annonce? a = await supabase.AnnonceDB.getAnnonceByAttributs(annonce);
+      if (a != null) {
       await supabase.AnnonceDB.deleteAnnonceByAttributs(annonce);
       await supabase.ProduitDB.deleteProduitById(a!.idProduit);
+      }
       await sqflite.AnnonceDB.deleteAnnonce(annonce.id as int);
     }
     else {

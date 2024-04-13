@@ -71,15 +71,29 @@ class UtilisateurDB {
   }
 
   static Future<void> updateUtilisateur(Utilisateur utilisateur) async {
+    Uint8List imageByte = await utilisateur.image!.readAsBytes();
+    String hexEncoded = hex.encode(imageByte);
     final response = await MyApp.client
         .from('utilisateur')
         .update({
       'nomu': utilisateur.nom,
       'prenomu': utilisateur.prenom,
       'motdepasse': utilisateur.motDePasse,
-      'imageprofil': utilisateur.imageProfilBytes,
+      'imageprofil': '\\x$hexEncoded',
     })
-        .eq('id', utilisateur.id);
+        .eq('idu', utilisateur.id);
+  }
+
+  static Future<void> updateUtilisateurWithoutImage(Utilisateur utilisateur) async {
+    final response = await MyApp.client
+        .from('utilisateur')
+        .update({
+      'pseudo' : utilisateur.pseudo,
+      'nomu': utilisateur.nom,
+      'prenomu': utilisateur.prenom,
+      'motdepasse': utilisateur.motDePasse,
+    })
+        .eq('idu', utilisateur.id);
   }
 
   static Future<void> deleteUtilisateurById(int id) async {

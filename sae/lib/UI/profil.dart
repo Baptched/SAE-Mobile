@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:sae/UI/edit_profil.dart';
 import 'package:sae/UI/mes_annonces.dart';
 import 'package:sae/UI/produits.dart';
 import 'package:sae/models/utilisateur.dart';
@@ -58,25 +59,25 @@ class _ProfilPageState extends State<ProfilPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: 50),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: Text(
+          const SizedBox(height: 50),
+          const Padding(
+            padding:  EdgeInsets.symmetric(vertical: 10.0),
+            child:  Text(
               'Profil',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
-          Divider(
+          const Divider(
             height: 1,
             color: Colors.grey,
           ),
           InkWell(
             onTap: () {
-              // Pour l'action : voir mon profil / le modifier ( jsp si on le fera )
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ModifierProfilPage()));
             },
             child: Container(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
                   _isLoading

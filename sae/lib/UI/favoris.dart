@@ -1,48 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:sae/database/supabase/annonceDB.dart';
-import 'package:sae/models/annonce.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sae/Widget/AnnonceWidget.dart';
+import '../Widget/AnnonceWidget.dart';
+import '../database/supabase/annonceDB.dart';
+import '../models/annonce.dart';
 
-class AnnoncesPage extends StatefulWidget {
+class AnnoncesFavoritesPage extends StatefulWidget {
   @override
-  _AnnoncesPageState createState() => _AnnoncesPageState();
+  _AnnoncesFavoritesPageState createState() => _AnnoncesFavoritesPageState();
 }
 
-class _AnnoncesPageState extends State<AnnoncesPage> {
-  late Future<List<Annonce>> _annoncesFuture = Future.value([]);
+class _AnnoncesFavoritesPageState extends State<AnnoncesFavoritesPage> {
+  late Future<List<Annonce>> _annoncesFavoritesFuture = Future.value([]);
 
   @override
   void initState() {
     super.initState();
-    _loadAnnonces();
+    _loadAnnoncesFavorites();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _loadAnnonces() ;
-  }
-
-  Future<void> _loadAnnonces() async {
+  Future<void> _loadAnnoncesFavorites() async {
     final pseudo = await SharedPreferences.getInstance().then((prefs) {
       return prefs.getString('pseudoUtilConnecte');
     });
     setState(() {
-      _annoncesFuture = AnnonceDB.getAllAnnoncesDifferentFromUser(pseudo);
+      _annoncesFavoritesFuture = AnnonceDB.getAnnoncesFavorisByPseudoUtil(pseudo!);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_annoncesFuture == null) {
-      return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Annonces favorites'),
+      ),
       body: Column(
         children: [
           const SizedBox(height: 50),
@@ -51,11 +41,11 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
             child: Column(
               children: [
                 Text(
-                  'Annonces',
+                  'Annonces favorites',
                   style: TextStyle(
                     fontSize: 29,
                     fontWeight: FontWeight.bold,
-                  )
+                  ),
                 ),
                 SizedBox(height: 10),
                 Divider(thickness: 4),
@@ -66,7 +56,7 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
           ),
           Expanded(
             child: FutureBuilder<List<Annonce>>(
-              future: _annoncesFuture,
+              future: _annoncesFavoritesFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(
@@ -76,7 +66,7 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
                   return Center(
                     child: Text('Erreur: ${snapshot.error}'),
                   );
-                } else if (snapshot.hasData) {
+                } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                   return ListView.builder(
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
@@ -86,7 +76,7 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
                   );
                 } else {
                   return Center(
-                    child: Text('Aucune annonce trouvée.'),
+                    child: Text('Aucune annonce favorite trouvée.'),
                   );
                 }
               },

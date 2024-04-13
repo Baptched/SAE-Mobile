@@ -30,9 +30,6 @@ class _AnnoncesFavoritesPageState extends State<AnnoncesFavoritesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Annonces favorites'),
-      ),
       body: Column(
         children: [
           const SizedBox(height: 50),
@@ -76,7 +73,7 @@ class _AnnoncesFavoritesPageState extends State<AnnoncesFavoritesPage> {
                   );
                 } else {
                   return Center(
-                    child: Text('Aucune annonce favorite trouvée.'),
+                    child: Text('Vous n''avez aucune annonce en favoris.'),
                   );
                 }
               },

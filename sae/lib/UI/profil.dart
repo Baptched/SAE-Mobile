@@ -8,6 +8,7 @@ import 'package:sae/models/utilisateur.dart';
 import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sae/UI/connexion.dart';
+import 'package:sae/UI/mes_reservations.dart';
 
 class ProfilPage extends StatefulWidget {
   @override
@@ -166,7 +167,8 @@ class _ProfilPageState extends State<ProfilPage> {
           ),
           InkWell(
             onTap: () {
-              // Ajoutez votre action ici
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => MesReservationsPage()));
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),

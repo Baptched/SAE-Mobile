@@ -27,6 +27,17 @@ class AnnonceDB {
     return annonces;
   }
 
+  static Future<Annonce?> getAnnonceById(int id) async {
+    final data = await MyApp.client
+        .from('annonce')
+        .select()
+        .eq('ida', id);
+    if (data.isEmpty) {
+      return null;
+    }
+    return Annonce.fromJsonSupabase(data[0]);
+  }
+
   static Future<List<Annonce>> getAnnoncesFavorisByPseudoUtil(String pseudo) async {
     final data = await MyApp.client
         .from('utilisateur')

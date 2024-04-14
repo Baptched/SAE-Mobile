@@ -1,14 +1,6 @@
 import 'dart:async';
-import 'dart:typed_data';
-import 'dart:ui';
-
-import 'package:convert/convert.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:sae/main.dart';
-import 'package:sae/models/produit.dart';
-import 'dart:io';
-import '../../UI/home.dart';
+import 'package:sae/models/reservation.dart';
 
 class ReservationBD{
 
@@ -29,12 +21,18 @@ class ReservationBD{
     ]);
   }
 
-  static Future<List<int>> getReservationsByUtilisateur(int idUtilisateur) async {
-    final data = await MyApp.client.from('reservation').select().eq('idu', idUtilisateur);
-    List<int> lesAnnoncesId = [];
-    for (var d in data) {
-      lesAnnoncesId.add(d['ida'] as int);
+  static Future<List<Reservation>> getReservationsByUtilisateur(int idUtilisateur) async {
+    // Récupérer les réservations associées à l'utilisateur depuis la base de données
+    final response = await MyApp.client
+        .from('reservation')
+        .select()
+        .eq('idu', idUtilisateur);
+
+
+    List<Reservation> reservations = [];
+    for (var d in response) {
+      reservations.add(Reservation.fromJson(d));
     }
-    return lesAnnoncesId;
+    return reservations;
   }
 }

@@ -8,9 +8,7 @@ import 'profil.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart'; // Importez le package path_provider pour utiliser getApplicationDocumentsDirectory()
 
-
 class Home extends StatefulWidget {
-
   static late String lienDossierImagesLocal;
   final int indexInitial;
 
@@ -27,7 +25,7 @@ class _HomePageState extends State<Home> {
     AnnoncesPage(),
     FavorisPage(),
     WidgetAjoutAnnonce(),
-    MessagesPage(),
+    ConversationsPage(),
     ProfilPage(),
   ];
 

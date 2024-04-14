@@ -1,115 +1,168 @@
 import 'package:flutter/material.dart';
-import 'package:sae/UI/detail_message.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../database/supabase/messageDB.dart';
+import '../database/supabase/utilisateurDB.dart';
+import '../models/message.dart';
+import '../models/utilisateur.dart';
+import 'detail_message.dart';
 
-class MessagesPage extends StatelessWidget {
-  final List<String> noms = [
-    'Baptched',
-    'Kyks',
-    'Samuel',
-    'Seb',
-    'Gael',
-  ];
+class ConversationsPage extends StatefulWidget {
+  @override
+  _ConversationsPageState createState() => _ConversationsPageState();
+}
 
-  final List<String> messages = [
-    'j\'ai farmé 4000 trophées sur brawlstars en un weekend',
-    '4e de promo et tjrs célibataire je comprends pas',
-    'j\'ai pas de stage gros c la merde',
-    'Kyyyyyyyyyyyyyyyyks',
-    'Oui j\'ai mangé une morbiflette a 6 000 calories et alors ?',
-  ];
+class _ConversationsPageState extends State<ConversationsPage> {
+  late Future<List<Message>> _conversationsFuture;
+  late Future<int?> _userIdFuture;
 
-  final List<int> nbAnnonces = [
-    0,
-    2,
-    3,
-    1,
-    0,
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _userIdFuture = _initialiser();
+    _conversationsFuture = chargerConversations();
+  }
 
-  final List<String> heures = [
-    '12:47',
-    '13:01',
-    '20:23',
-    '3:40',
-    '16:59',
-  ];
+  Future<int?> _initialiser() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('idUtilConnecte');
+  }
+
+  Future<List<Message>> chargerConversations() async {
+    final userId = await _userIdFuture;
+    if (userId != null) {
+      return await MessageDB.getConversations(userId);
+    } else {
+      return []; // Retourne une liste vide en cas d'échec de récupération de l'ID utilisateur
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<int?>(
+      future: _userIdFuture = _initialiser(),
+      builder: (context, userIdSnapshot) {
+        if (userIdSnapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Conversations'),
+            ),
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (userIdSnapshot.hasError || userIdSnapshot.data == null) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Conversations'),
+            ),
+            body: Center(child: Text('Erreur lors de la récupération de l\'ID utilisateur.')),
+          );
+        } else {
+          return _buildConversationsPage(userIdSnapshot.data!);
+        }
+      },
+    );
+  }
+
+  Widget _buildConversationsPage(int userId) {
+    if (_userIdFuture == null) {
+      return Center(child: CircularProgressIndicator());
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Text('Vos conversations'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              // Action de recherche
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.more_vert),
-            onPressed: () {
-              // Autres actions
-            },
-          ),
-        ],
+        title: Text('Conversations'),
       ),
-      body: ListView.separated(
-        itemCount: noms.length,
-        separatorBuilder: (context, index) => Divider(),
-        itemBuilder: (context, index) {
-          final nom = noms[index];
-          final message = messages[index];
-          final heure = heures[index];
-          final nombreAnnonces = nbAnnonces[index];
+      body: FutureBuilder<List<Message>>(
+        future: _conversationsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Une erreur est survenue.'));
+          } else {
+            List<Message> conversations = snapshot.data!;
+            if (conversations.isEmpty) {
+              return Center(child: Text('Aucune conversation disponible.'));
+            }
+            return ListView.builder(
+              itemCount: conversations.length,
+              itemBuilder: (context, index) {
+                Message message = conversations[index];
+                return _buildConversationItem(userId, message);
+              },
+            );
+          }
+        },
+      ),
+    );
+  }
+
+
+  Widget _buildConversationItem(int userId, Message message) {
+    return FutureBuilder<Utilisateur?>(
+      future: UtilisateurDB.getUtilisateurById(
+        message.idUtilisateurEnvoi == userId
+            ? message.idUtilisateurRecoit
+            : message.idUtilisateurEnvoi,
+      ),
+      builder: (context, utilisateurSnapshot) {
+        if (utilisateurSnapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (utilisateurSnapshot.hasError) {
+          return Center(child: Text('Une erreur est survenue.'));
+        } else {
+          Utilisateur? utilisateurAutre = utilisateurSnapshot.data;
           return GestureDetector(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ConversationWidget()));
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    backgroundImage: AssetImage('assets/user_img/default_user_image.png'),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ConversationWidget(
+                    idUserConnected: userId,
+                    idUserToChat: utilisateurAutre?.id ?? 0,
                   ),
-                  SizedBox(width: 16.0),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              nom,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(width: 8.0),
-                            Text('$nombreAnnonces annonces'),
-                          ],
-                        ),
-                        SizedBox(height: 4.0),
-                        Text(message),
-                        SizedBox(height: 8.0),
-                        Text(
-                          heure, // Heure du message
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
+                ),
+              );
+            },
+            child: Card(
+              elevation: 3, // Définir l'élévation de la carte pour une apparence légèrement en relief
+              margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: utilisateurAutre?.imageUint8List != null
+                        ? Image.memory(
+                      utilisateurAutre!.imageUint8List!,
+                    ).image
+                        : null,
+                  ),
+                  title: Text(
+                    utilisateurAutre?.pseudo ?? ' ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ],
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 4.0),
+                      Text(
+                        message.contenu,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 8.0),
+                      Text(
+                        message.dateEnvoi,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-        },
-        child: Icon(Icons.message),
-      ),
+        }
+      },
     );
   }
 }

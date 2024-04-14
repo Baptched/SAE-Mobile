@@ -61,14 +61,20 @@ class _AnnonceWidgetState extends State<AnnonceWidget> {
         : _produit != null && _utilisateur != null
             ? GestureDetector(
                 // Wrap AnnonceWidget in GestureDetector
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  final response = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
                           DetailAnnonce(annonce: widget.annonce, produit: _produit!, utilisateur: _utilisateur!, isLiked: _isLiked, likesCount: _likesCount)
                     ),
                   );
+                  if (response != null) {
+                    setState(() {
+                      _isLiked = response['isLiked'];
+                      _likesCount = response['likesCount'];
+                    });
+                  }
                 },
                 child: buildAnnonceWidget(),
               )
@@ -125,6 +131,7 @@ class _AnnonceWidgetState extends State<AnnonceWidget> {
                         }
                         FavDB.likeUnLikeAnnonce(
                             widget.annonce.id ?? 0, idUser ?? 0);
+                        // // Mettre à jour les données avec les données mises à jour de DetailAnnonce
                         setState(() {
                           _isLiked = !_isLiked;
                           if (_isLiked) {

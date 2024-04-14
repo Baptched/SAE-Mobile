@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:sae/UI/detail_message.dart';
+import 'package:sae/database/supabase/favDB.dart';
+import 'package:sae/database/supabase/reservationBD.dart';
 import 'package:sae/models/annonce.dart';
 import 'package:sae/models/produit.dart';
-import 'package:sae/database/supabase/produitDB.dart';
 import 'package:sae/models/utilisateur.dart';
-import 'package:sae/database/supabase/utilisateurDB.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sae/database/supabase/favDB.dart';
 
 class DetailAnnonce extends StatefulWidget {
   final Annonce annonce;
@@ -43,6 +43,16 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Détails de l\'annonce'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            print('Retour à la page précédente');
+            Navigator.pop(context, {
+              'isLiked': _isLiked,
+              'likesCount': _likesCount,
+            });
+          },
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -81,12 +91,11 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
                       ),
                     ),
                     SizedBox(height: 8),
-                    widget.produit.imageUint8List != null
-                        ? Image.memory(
-                            widget.produit.imageUint8List!,
-                            fit: BoxFit.cover,
-                          )
-                        : SizedBox(),
+                    if (widget.produit.imageUint8List != null)
+                      Image.memory(
+                        widget.produit.imageUint8List!,
+                        fit: BoxFit.cover,
+                      ),
                     SizedBox(height: 16),
                     Divider(),
                     Row(
@@ -94,14 +103,15 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            int? idUser = await SharedPreferences.getInstance()
-                                .then(
-                                    (prefs) => prefs.getInt('idUtilConnecte'));
+                            int? idUser =
+                            await SharedPreferences.getInstance().then(
+                                  (prefs) =>
+                                  prefs.getInt('idUtilConnecte'),
+                            );
                             while (idUser == null) {
                               await Future.delayed(Duration(seconds: 1));
                               idUser = await SharedPreferences.getInstance()
-                                  .then((prefs) =>
-                                      prefs.getInt('idUtilConnecte'));
+                                  .then((prefs) => prefs.getInt('idUtilConnecte'));
                             }
                             FavDB.likeUnLikeAnnonce(
                                 widget.annonce.id ?? 0, idUser ?? 0);
@@ -129,7 +139,7 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            // Ajoutez ici la logique pour réserver l'annonce
+                            _showDateSelection(context);
                           },
                           child: Text('Réserver'),
                         ),
@@ -157,31 +167,44 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
                       children: [
                         Row(
                           children: [
-                            CircleAvatar(
-                              backgroundImage: widget
-                                          .utilisateur.imageUint8List !=
-                                      null
-                                  ? Image.memory(
-                                          widget.utilisateur.imageUint8List!)
-                                      .image
-                                  : null,
-                            ),
+                            if (widget.utilisateur.imageUint8List != null)
+                              CircleAvatar(
+                                backgroundImage:
+                                Image.memory(widget.utilisateur.imageUint8List!)
+                                    .image,
+                              ),
                             SizedBox(width: 16),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('${widget.utilisateur.pseudo ?? ""}'),
                                 SizedBox(height: 8),
-                                Text(
-                                  '/5',
-                                ),
+                                Text('/5'),
                               ],
                             ),
                           ],
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            // Ajoutez ici la logique pour envoyer un message
+                          onPressed: () async {
+                            int? idUser =
+                            await SharedPreferences.getInstance().then(
+                                  (prefs) =>
+                                  prefs.getInt('idUtilConnecte'),
+                            );
+                            while (idUser == null) {
+                              await Future.delayed(Duration(seconds: 1));
+                              idUser = await SharedPreferences.getInstance()
+                                  .then((prefs) => prefs.getInt('idUtilConnecte'));
+                            }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ConversationWidget(
+                                  idUserConnected: idUser ?? 0,
+                                  idUserToChat: widget.utilisateur.id,
+                                ),
+                              ),
+                            );
                           },
                           child: Row(
                             children: [
@@ -200,6 +223,100 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showDateSelection(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          height: MediaQuery.of(context).size.height * 0.35,
+          child: DateSelectionPage(
+            idAnnonce: widget.annonce.id ?? 0,
+            idUtilisateur: widget.utilisateur.id ?? 0,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class DateSelectionPage extends StatefulWidget {
+  final int idAnnonce;
+  final int idUtilisateur;
+
+  DateSelectionPage({required this.idAnnonce, required this.idUtilisateur});
+
+  @override
+  _DateSelectionPageState createState() => _DateSelectionPageState();
+}
+
+class _DateSelectionPageState extends State<DateSelectionPage> {
+  late DateTime _startDate;
+  late DateTime _endDate;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize start and end dates to today and tomorrow respectively
+    _startDate = DateTime.now();
+    _endDate = DateTime.now().add(Duration(days: 1));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        SizedBox(height: 50),
+        ListTile(
+          title: Text("Date de début"),
+          subtitle: Text("${_startDate.toLocal()}".split(' ')[0]),
+          onTap: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: _startDate,
+              firstDate: DateTime.now(),
+              lastDate: DateTime(2101),
+            );
+            if (pickedDate != null && pickedDate != _startDate)
+              setState(() {
+                _startDate = pickedDate;
+              });
+          },
+        ),
+        ListTile(
+          title: Text("Date de fin"),
+          subtitle: Text("${_endDate.toLocal()}".split(' ')[0]),
+          onTap: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: _endDate,
+              firstDate: DateTime.now(),
+              lastDate: DateTime(2101),
+            );
+            if (pickedDate != null && pickedDate != _endDate)
+              setState(() {
+                _endDate = pickedDate;
+              });
+          },
+        ),
+        ElevatedButton(
+          onPressed: () {
+            print('Date de début: $_startDate');
+            print('Date de fin: $_endDate');
+            print('idAnnonce: ${widget.idAnnonce}, idUtilisateur: ${widget.idUtilisateur}');
+            ReservationBD.addReservation(widget.idAnnonce, widget.idUtilisateur, _startDate, _endDate);
+            Navigator.pop(context, {
+              'startDate': _startDate,
+              'endDate': _endDate,
+            });
+          },
+          child: Text('Réserver'),
+        ),
+      ],
     );
   }
 }

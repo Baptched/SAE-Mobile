@@ -51,11 +51,11 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
             child: Column(
               children: [
                 Text(
-                  'Annonces',
-                  style: TextStyle(
-                    fontSize: 29,
-                    fontWeight: FontWeight.bold,
-                  )
+                    'Annonces',
+                    style: TextStyle(
+                      fontSize: 29,
+                      fontWeight: FontWeight.bold,
+                    )
                 ),
                 SizedBox(height: 10),
                 Divider(thickness: 4),

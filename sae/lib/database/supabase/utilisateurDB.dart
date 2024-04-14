@@ -3,14 +3,12 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:sae/main.dart';
 import 'package:sae/models/utilisateur.dart';
-class UtilisateurDB {
 
+class UtilisateurDB {
   static Future<void> insererUtilisateur(Utilisateur utilisateur) async {
     Uint8List imageByte = await utilisateur.image!.readAsBytes();
-    String hexEncoded = hex.encode(imageByte); 
-    await MyApp.client
-        .from('utilisateur')
-        .insert([
+    String hexEncoded = hex.encode(imageByte);
+    await MyApp.client.from('utilisateur').insert([
       {
         'nomu': utilisateur.nom,
         'prenomu': utilisateur.prenom,
@@ -23,10 +21,8 @@ class UtilisateurDB {
 
   // Méthode pour récupérer un utilisateur par son pseudo
   static Future<Utilisateur?> getUtilisateurByPseudo(String pseudo) async {
-    final data = await MyApp.client
-        .from('utilisateur')
-        .select()
-        .eq('pseudo', pseudo);
+    final data =
+        await MyApp.client.from('utilisateur').select().eq('pseudo', pseudo);
 
     if (data.isEmpty) {
       return null;
@@ -36,18 +32,15 @@ class UtilisateurDB {
   }
 
   static Future<Utilisateur?> getUtilisateurById(int id) async {
-    print(id);
-    final data = await MyApp.client
-        .from('utilisateur')
-        .select()
-        .eq('idu', id);
+    final data = await MyApp.client.from('utilisateur').select().eq('idu', id);
     if (data.isEmpty) {
       return null;
     }
     return Utilisateur.fromJson(data[0]);
   }
 
-  static Future<Utilisateur?> getUtilisateurByPseudoAndMotDePasse(String pseudo, String motDePasse) async {
+  static Future<Utilisateur?> getUtilisateurByPseudoAndMotDePasse(
+      String pseudo, String motDePasse) async {
     final data = await MyApp.client
         .from('utilisateur')
         .select()
@@ -60,9 +53,7 @@ class UtilisateurDB {
   }
 
   static Future<List<Utilisateur>> getAllUtilisateurs() async {
-    final data = await MyApp.client
-        .from('utilisateur')
-        .select();
+    final data = await MyApp.client.from('utilisateur').select();
     List<Utilisateur> utilisateurs = [];
     for (var utilisateur in data) {
       utilisateurs.add(Utilisateur.fromJson(utilisateur));
@@ -71,34 +62,25 @@ class UtilisateurDB {
   }
 
   static Future<void> updateUtilisateur(Utilisateur utilisateur) async {
-    final response = await MyApp.client
-        .from('utilisateur')
-        .update({
+    final response = await MyApp.client.from('utilisateur').update({
       'nomu': utilisateur.nom,
       'prenomu': utilisateur.prenom,
       'motdepasse': utilisateur.motDePasse,
       'imageprofil': utilisateur.imageProfilBytes,
-    })
-        .eq('id', utilisateur.id);
+    }).eq('id', utilisateur.id);
   }
 
   static Future<void> deleteUtilisateurById(int id) async {
-    final response = await MyApp.client
-        .from('utilisateur')
-        .delete()
-        .eq('id', id);
+    final response =
+        await MyApp.client.from('utilisateur').delete().eq('id', id);
   }
 
   static Future<void> deleteUtilisateurByPseudo(String pseudo) async {
-    final response = await MyApp.client
-        .from('utilisateur')
-        .delete()
-        .eq('pseudo', pseudo);
+    final response =
+        await MyApp.client.from('utilisateur').delete().eq('pseudo', pseudo);
   }
 
   static Future<void> deleteAllUtilisateurs() async {
-    final response = await MyApp.client
-        .from('utilisateur')
-        .delete();
+    final response = await MyApp.client.from('utilisateur').delete();
   }
 }

@@ -1,27 +1,89 @@
 import 'package:flutter/material.dart';
+import '../database/supabase/messageDB.dart';
+import '../database/supabase/utilisateurDB.dart';
+import '../models/message.dart';
+import '../models/utilisateur.dart';
 
-class ConversationWidget extends StatelessWidget {
+class ConversationWidget extends StatefulWidget {
+  final int idUserConnected;
+  final int idUserToChat;
+
+  ConversationWidget({
+    required this.idUserConnected,
+    required this.idUserToChat,
+  });
+
+  @override
+  _ConversationWidgetState createState() => _ConversationWidgetState();
+}
+
+class _ConversationWidgetState extends State<ConversationWidget> {
+  Utilisateur? _utilisateurConnected;
+  Utilisateur? _utilisateurToChat;
+  List<Message> messages = [];
+  bool _dataLoaded = false;
+  TextEditingController _messageController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    chargerUsersAndMessages();
+  }
+
+  Future<void> chargerUsersAndMessages() async {
+    if (!_dataLoaded) {
+      _utilisateurConnected =
+      await UtilisateurDB.getUtilisateurById(widget.idUserConnected);
+      _utilisateurToChat =
+      await UtilisateurDB.getUtilisateurById(widget.idUserToChat);
+      messages = await MessageDB.getMessagesBetweenUsers(
+          widget.idUserConnected, widget.idUserToChat);
+      setState(() {
+        _dataLoaded = true;
+      });
+    }
+  }
+
+  Future<void> envoyerMessage(String contenu) async {
+    if (contenu.isNotEmpty) {
+      Message message = Message(
+        id: 0,
+        idUtilisateurEnvoi: widget.idUserConnected,
+        idUtilisateurRecoit: widget.idUserToChat,
+        contenu: contenu,
+        dateEnvoi: DateTime.now().toString()
+      );
+      MessageDB.ajouterMessage(message);
+      setState(() {
+        messages.insert(0, message);
+      });
+      _messageController.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Conversation avec Baptched'),
+        title: Text('Conversation avec ${_utilisateurToChat?.pseudo ?? 'Utilisateur'}'),
       ),
-      body: Column(
+      body: _dataLoaded
+          ? Column(
         children: [
           Expanded(
-            child: ListView(
+            child: messages.isEmpty
+                ? Center(
+              child: Text('Aucun message.'),
+            )
+                : ListView(
               reverse: true,
               padding: EdgeInsets.all(16.0),
-              children: [
-                // Messages dans la conversation
-                MessageBubble(isSentByMe: false, message:  'j\'ai farmé 4000 trophées\n sur brawlstars en un weekend !!!'),
-                SizedBox(height: 8.0),
-                MessageBubble(isSentByMe: true, message: 'ah ouais ? Moi je suis nul j\'ai pas vu \nle GoRouter en cours avec Mr Nguyen'),
-                SizedBox(height: 8.0),
-                MessageBubble(isSentByMe: false, message: 'Kylian est trop un bon développeur\n en flutter ca fait plaisir de ouf'),
-                // Ajoutez d'autres messages ici
-              ],
+              children: messages.map((message) {
+                return MessageBubble(
+                  isSentByMe: message.idUtilisateurEnvoi == widget.idUserConnected,
+                  message: message.contenu,
+                );
+              }).toList(),
             ),
           ),
           // Zone de saisie pour écrire un nouveau message
@@ -31,6 +93,7 @@ class ConversationWidget extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: _messageController,
                     decoration: InputDecoration(
                       hintText: 'Écrire un message...',
                       border: OutlineInputBorder(),
@@ -40,7 +103,7 @@ class ConversationWidget extends StatelessWidget {
                 SizedBox(width: 16.0),
                 FloatingActionButton(
                   onPressed: () {
-                    // Action pour envoyer le message
+                    envoyerMessage(_messageController.text);
                   },
                   child: Icon(Icons.send),
                 ),
@@ -48,8 +111,17 @@ class ConversationWidget extends StatelessWidget {
             ),
           ),
         ],
+      )
+          : Center(
+        child: CircularProgressIndicator(),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
   }
 }
 

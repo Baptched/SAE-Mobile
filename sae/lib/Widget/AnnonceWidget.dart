@@ -78,7 +78,7 @@ class _AnnonceWidgetState extends State<AnnonceWidget> {
                 },
                 child: buildAnnonceWidget(),
               )
-            : SizedBox(); // Placeholder Widget when data is not yet loaded
+            : SizedBox();
   }
 
   Widget buildAnnonceWidget() {

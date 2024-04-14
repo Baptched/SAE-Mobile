@@ -28,27 +28,35 @@ class _MesReservationsPageState extends State<MesReservationsPage> {
         return prefs.getInt('idUtilConnecte');
       });
     }
+    print('idUtilisateur: $idUtilisateur');
     List<Reservation> fetchedReservations =
     await ReservationBD.getReservationsByUtilisateur(idUtilisateur);
     setState(() {
       reservations = fetchedReservations;
+      print(fetchedReservations);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    print('reservations.length: ${reservations.length}');
     return Scaffold(
       appBar: AppBar(
         title: Text('Mes Réservations'),
       ),
-      body: Expanded(
-        child: ListView.builder(
-          itemCount: reservations.length,
-          itemBuilder: (context, index) {
-            return ReservationCard(reservation: reservations[index]);
-          },
-        ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: reservations.length,
+              itemBuilder: (context, index) {
+                return ReservationCard(reservation: reservations[index]);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+

@@ -60,7 +60,6 @@ class _AnnonceWidgetState extends State<AnnonceWidget> {
         ? CircularProgressIndicator()
         : _produit != null && _utilisateur != null
             ? GestureDetector(
-                // Wrap AnnonceWidget in GestureDetector
                 onTap: () async {
                   final response = await Navigator.push(
                     context,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sae/UI/detail_message.dart';
+import 'package:sae/UI/profil_autre_utilisateur.dart';
 import 'package:sae/database/supabase/favDB.dart';
 import 'package:sae/database/supabase/reservationBD.dart';
 import 'package:sae/models/annonce.dart';
@@ -37,7 +38,6 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
     _likesCount = widget.likesCount;
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,24 +165,36 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            if (widget.utilisateur.imageUint8List != null)
-                              CircleAvatar(
-                                backgroundImage:
-                                Image.memory(widget.utilisateur.imageUint8List!)
-                                    .image,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfilUtilisateurPage(
+                                  pseudo: widget.utilisateur.pseudo ?? '',
+                                ),
                               ),
-                            SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('${widget.utilisateur.pseudo ?? ""}'),
-                                SizedBox(height: 8),
-                                Text('/5'),
-                              ],
-                            ),
-                          ],
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              if (widget.utilisateur.imageUint8List != null)
+                                CircleAvatar(
+                                  backgroundImage:
+                                  Image.memory(widget.utilisateur.imageUint8List!)
+                                      .image,
+                                ),
+                              SizedBox(width: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${widget.utilisateur.pseudo ?? ""}'),
+                                  SizedBox(height: 8),
+                                  Text('/5'),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                         ElevatedButton(
                           onPressed: () async {
@@ -226,6 +238,7 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
     );
   }
 
+
   void _showDateSelection(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -236,7 +249,6 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
           height: MediaQuery.of(context).size.height * 0.35,
           child: DateSelectionPage(
             idAnnonce: widget.annonce.id ?? 0,
-            idUtilisateur: widget.utilisateur.id ?? 0,
           ),
         );
       },
@@ -246,9 +258,9 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
 
 class DateSelectionPage extends StatefulWidget {
   final int idAnnonce;
-  final int idUtilisateur;
+  int idUtilisateur = 0;
 
-  DateSelectionPage({required this.idAnnonce, required this.idUtilisateur});
+  DateSelectionPage({required this.idAnnonce});
 
   @override
   _DateSelectionPageState createState() => _DateSelectionPageState();
@@ -264,6 +276,15 @@ class _DateSelectionPageState extends State<DateSelectionPage> {
     // Initialize start and end dates to today and tomorrow respectively
     _startDate = DateTime.now();
     _endDate = DateTime.now().add(Duration(days: 1));
+    _loadIdUtilisateur();
+  }
+
+  Future<void> _loadIdUtilisateur() async {
+    int? idUser = await SharedPreferences.getInstance().then((prefs) {
+      return prefs.getInt('idUtilConnecte');
+    });
+    print('idUtilisateur: $idUser');
+    widget.idUtilisateur = idUser ?? 0;
   }
 
   @override
@@ -308,6 +329,7 @@ class _DateSelectionPageState extends State<DateSelectionPage> {
             print('Date de début: $_startDate');
             print('Date de fin: $_endDate');
             print('idAnnonce: ${widget.idAnnonce}, idUtilisateur: ${widget.idUtilisateur}');
+
             ReservationBD.addReservation(widget.idAnnonce, widget.idUtilisateur, _startDate, _endDate);
             Navigator.pop(context, {
               'startDate': _startDate,

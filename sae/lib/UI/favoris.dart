@@ -73,7 +73,7 @@ class _AnnoncesFavoritesPageState extends State<AnnoncesFavoritesPage> {
                   );
                 } else {
                   return Center(
-                    child: Text('Vous n''avez aucune annonce en favoris.'),
+                    child: Text('Vous n\'avez pas d\'annonces ajoutées en favoris.'),
                   );
                 }
               },

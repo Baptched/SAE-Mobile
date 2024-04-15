@@ -55,7 +55,7 @@ class _ReservationCardState extends State<ReservationCard> {
                   : Container(),
               title: Text('Produit: ${produit?.label ?? "N/A"}'),
               subtitle: Text(
-                  'État: ${determineReservationStatus(widget.reservation.startDate, widget.reservation.endDate)}'),
+                  'État: ${determineReservationStatus(widget.reservation.startDate, widget.reservation.endDate, widget.reservation)}'),
             ),
           );
   }
@@ -76,10 +76,14 @@ class _ReservationCardState extends State<ReservationCard> {
     });
   }
 
-  String determineReservationStatus(DateTime startDate, DateTime endDate) {
+  String determineReservationStatus(DateTime startDate, DateTime endDate, Reservation reservation) {
     DateTime now = DateTime.now();
     if (endDate.isBefore(now)) {
-      return 'Terminée';
+      if (reservation.isEvaluated) {
+        return 'Terminée';
+      } else {
+        return 'A évaluer';
+      }
     } else if (startDate.isBefore(now)) {
       return 'En cours';
     } else {

@@ -28,11 +28,17 @@ class ReservationBD{
         .select()
         .eq('idu', idUtilisateur);
 
-
     List<Reservation> reservations = [];
     for (var d in response) {
       reservations.add(Reservation.fromJson(d));
     }
+    for (var r in reservations) {
+      print(r.isEvaluated);
+    }
     return reservations;
+  }
+
+  static Future<void> isEvaluated(int idReservation) async {
+    await MyApp.client.from('reservation').update({'isEvaluate': 1}).eq('idr', idReservation);
   }
 }

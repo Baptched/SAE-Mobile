@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sae/UI/detail_message.dart';
 import 'package:sae/UI/profil_autre_utilisateur.dart';
+import 'package:sae/database/supabase/avisutilisateurDB.dart';
 import 'package:sae/database/supabase/favDB.dart';
 import 'package:sae/database/supabase/reservationBD.dart';
 import 'package:sae/models/annonce.dart';
@@ -30,14 +31,34 @@ class DetailAnnonce extends StatefulWidget {
 
 class _DetailAnnonceState extends State<DetailAnnonce> {
   bool _isLiked = false;
+  double? _note;
   late int _likesCount;
 
   @override
   void initState() {
+    super.initState();
+    initializeState();
+  }
+
+  void initializeState() async {
     _isLiked = widget.isLiked;
     _likesCount = widget.likesCount;
-    super.initState();
+    int? idUser = await SharedPreferences.getInstance().then(
+      (prefs) => prefs.getInt('idUtilConnecte'),
+    );
+    while (idUser == null) {
+      await Future.delayed(Duration(seconds: 1));
+      idUser = await SharedPreferences.getInstance()
+          .then((prefs) => prefs.getInt('idUtilConnecte'));
+    }
+    double? noteUtil =
+        await AvisUtilisateurDB.getMoyenne(widget.utilisateur.id);
+    setState(() {
+      _note = noteUtil;
+
+    });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,14 +125,14 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
                         ElevatedButton(
                           onPressed: () async {
                             int? idUser =
-                            await SharedPreferences.getInstance().then(
-                                  (prefs) =>
-                                  prefs.getInt('idUtilConnecte'),
+                                await SharedPreferences.getInstance().then(
+                              (prefs) => prefs.getInt('idUtilConnecte'),
                             );
                             while (idUser == null) {
                               await Future.delayed(Duration(seconds: 1));
                               idUser = await SharedPreferences.getInstance()
-                                  .then((prefs) => prefs.getInt('idUtilConnecte'));
+                                  .then((prefs) =>
+                                      prefs.getInt('idUtilConnecte'));
                             }
                             FavDB.likeUnLikeAnnonce(
                                 widget.annonce.id ?? 0, idUser ?? 0);
@@ -180,8 +201,8 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
                             children: [
                               if (widget.utilisateur.imageUint8List != null)
                                 CircleAvatar(
-                                  backgroundImage:
-                                  Image.memory(widget.utilisateur.imageUint8List!)
+                                  backgroundImage: Image.memory(
+                                          widget.utilisateur.imageUint8List!)
                                       .image,
                                 ),
                               SizedBox(width: 16),
@@ -190,7 +211,7 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
                                 children: [
                                   Text('${widget.utilisateur.pseudo ?? ""}'),
                                   SizedBox(height: 8),
-                                  Text('/5'),
+                                  Text('${_note ?? 0}/5'),
                                 ],
                               ),
                             ],
@@ -199,14 +220,14 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
                         ElevatedButton(
                           onPressed: () async {
                             int? idUser =
-                            await SharedPreferences.getInstance().then(
-                                  (prefs) =>
-                                  prefs.getInt('idUtilConnecte'),
+                                await SharedPreferences.getInstance().then(
+                              (prefs) => prefs.getInt('idUtilConnecte'),
                             );
                             while (idUser == null) {
                               await Future.delayed(Duration(seconds: 1));
                               idUser = await SharedPreferences.getInstance()
-                                  .then((prefs) => prefs.getInt('idUtilConnecte'));
+                                  .then((prefs) =>
+                                      prefs.getInt('idUtilConnecte'));
                             }
                             Navigator.push(
                               context,
@@ -237,7 +258,6 @@ class _DetailAnnonceState extends State<DetailAnnonce> {
       ),
     );
   }
-
 
   void _showDateSelection(BuildContext context) {
     showModalBottomSheet(
@@ -328,9 +348,11 @@ class _DateSelectionPageState extends State<DateSelectionPage> {
           onPressed: () {
             print('Date de début: $_startDate');
             print('Date de fin: $_endDate');
-            print('idAnnonce: ${widget.idAnnonce}, idUtilisateur: ${widget.idUtilisateur}');
+            print(
+                'idAnnonce: ${widget.idAnnonce}, idUtilisateur: ${widget.idUtilisateur}');
 
-            ReservationBD.addReservation(widget.idAnnonce, widget.idUtilisateur, _startDate, _endDate);
+            ReservationBD.addReservation(
+                widget.idAnnonce, widget.idUtilisateur, _startDate, _endDate);
             Navigator.pop(context, {
               'startDate': _startDate,
               'endDate': _endDate,

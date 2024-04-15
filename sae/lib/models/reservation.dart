@@ -4,6 +4,7 @@ class Reservation {
   final int idUtilisateur;
   final DateTime startDate;
   final DateTime endDate;
+  bool isEvaluated;
 
   Reservation({
     required this.id,
@@ -11,6 +12,7 @@ class Reservation {
     required this.idUtilisateur,
     required this.startDate,
     required this.endDate,
+    required this.isEvaluated,
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Reservation {
       idUtilisateur: json['idu'],
       startDate: DateTime.parse(json['datedebut']),
       endDate: DateTime.parse(json['datefin']),
+      isEvaluated: json['isEvaluate']
     );
   }
 }

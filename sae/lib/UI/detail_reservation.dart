@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:sae/models/annonce.dart';
 import 'package:sae/models/produit.dart';
 import 'package:sae/models/reservation.dart';
-import 'package:sae/database/supabase/evaluationBD.dart';
+import 'package:sae/models/utilisateur.dart';
+import '../Widget/AjoutAvis.dart';
+import '../database/supabase/utilisateurDB.dart';
+import 'package:sae/database/supabase/reservationBD.dart';
 
-class ReservationDetailPage extends StatelessWidget {
+class ReservationDetailPage extends StatefulWidget {
   final Reservation reservation;
   final Annonce annonce;
   final Produit produit;
@@ -14,6 +17,19 @@ class ReservationDetailPage extends StatelessWidget {
     required this.annonce,
     required this.produit,
   });
+
+  @override
+  _ReservationDetailPageState createState() => _ReservationDetailPageState();
+}
+
+class _ReservationDetailPageState extends State<ReservationDetailPage> {
+  bool isReservationPassed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    isReservationPassed = DateTime.now().isAfter(widget.reservation.endDate);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,25 +49,26 @@ class ReservationDetailPage extends StatelessWidget {
                 children: [
                   ListTile(
                     title: Text(
-                      'Produit: ${produit.label}',
+                      'Produit: ${widget.produit.label}',
                       style: TextStyle(
                         fontSize: 18.0,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Image.memory(
-                        produit.imageUint8List!,
-                        fit: BoxFit.cover,
-                        width: MediaQuery.of(context).size.width,
-                        height: 200.0,
+                  if (widget.produit.imageUint8List != null)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image.memory(
+                          widget.produit.imageUint8List!,
+                          fit: BoxFit.cover,
+                          width: MediaQuery.of(context).size.width,
+                          height: 200.0,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -60,129 +77,54 @@ class ReservationDetailPage extends StatelessWidget {
               elevation: 4,
               child: ListTile(
                 title: Text(
-                  'Annonce: ${annonce.id}',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
+                  'Date début: ${widget.reservation.startDate}',
+                  style: TextStyle(fontSize: 16.0),
+                ),
+              ),
+            ),
+            Card(
+              elevation: 4,
+              child: ListTile(
+                title: Text(
+                  'Date fin: ${widget.reservation.endDate}',
+                  style: TextStyle(fontSize: 16.0),
+                ),
+              ),
+            ),
+            SizedBox(height: 16.0),
+            if (!widget.reservation.isEvaluated && isReservationPassed)
+              Card(
+                elevation: 4,
+                child: ListTile(
+                  title: Text(
+                    'Ajouter un avis',
+                    style: TextStyle(fontSize: 16),
                   ),
-                ),
-              ),
-            ),
-            SizedBox(height: 16.0),
-            Card(
-              elevation: 4,
-              child: ListTile(
-                title: Text(
-                  'Date début: ${reservation.startDate}',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-              ),
-            ),
-            Card(
-              elevation: 4,
-              child: ListTile(
-                title: Text(
-                  'Date fin: ${reservation.endDate}',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-              ),
-            ),
-            SizedBox(height: 16.0),
-            FutureBuilder<bool>(
-              future: EvaluationBD().isEvaluate(reservation.id),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(); // Placeholder while waiting for future result
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else if (snapshot.data == true) {
-                  return Card(
-                    elevation: 4,
-                    child: ListTile(
-                      title: Text(
-                        'État: Évaluée',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ),
-                  );
-                } else {
-                  return Card(
-                    elevation: 4,
-                    child: ListTile(
-                      title: Text(
-                        'État: À évaluer',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                      ),
-                      trailing: ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              int? _rating;
-                              bool _isButtonDisabled = true; // État initial du bouton Évaluer
+                  onTap: () async {
+                    Utilisateur? utilisateur = await UtilisateurDB.getUtilisateurById(widget.produit.idUtilisateur ?? 0);
+                    // Afficher la boîte de dialogue pour ajouter un avis
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content: utilisateur != null
+                              ? AjouterAvisWidget(
+                            pseudoUtilisateur: utilisateur.pseudo,
+                            idUtilisateur: utilisateur.id,
+                          )
+                              : Text('Utilisateur introuvable.'),
+                        );
 
-                              return StatefulBuilder(
-                                builder: (BuildContext context, StateSetter setState) {
-                                  return AlertDialog(
-                                    title: Text('Évaluer la réservation'),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text('Veuillez entrer une note entre 1 et 5 :'),
-                                        TextField(
-                                          keyboardType: TextInputType.number,
-                                          onChanged: (value) {
-                                            int? rating = int.tryParse(value);
-                                            if (rating != null && rating >= 1 && rating <= 5) {
-                                              _rating = rating;
-                                            } else {
-                                              _rating = null;
-                                            }
+                      },
+                    );
+                    ReservationBD.isEvaluated(widget.reservation.id) ;
+                    setState(() {
+                      widget.reservation.isEvaluated = true;
+                    });
 
-                                            // Mettre à jour l'état du bouton Évaluer en fonction de la validité de la note
-                                            setState(() {
-                                              _isButtonDisabled = _rating == null;
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Annuler'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: _isButtonDisabled ? null : () {
-                                          EvaluationBD.ajouterEvaluation(reservation.id, _rating!);
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Évaluer'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          );
-                        },
-                        child: Text('Évaluer'),
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
+                  },
+                ),
+              ),
           ],
         ),
       ),

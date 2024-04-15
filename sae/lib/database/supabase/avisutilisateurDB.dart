@@ -16,7 +16,25 @@ class AvisUtilisateurDB {
     ]);
   }
 
+  // getMoyenne
+  static Future<double> getMoyenne(int idUtilisateur) async {
+    final response = await MyApp.client
+        .from('avisutilisateur')
+        .select('note')
+        .eq('idu_receveur', idUtilisateur);
 
+    double moyenne = 0;
+    int count = 0;
+    print(response);
+    for (var d in response) {
+      moyenne += d['note'];
+      count++;
+    }
+    if (count == 0) {
+      return 0;
+    }
+    return moyenne / count;
+  }
 
   static Future<List<AvisUtilisateur>> getAvisUtilisateurByUtilisateur(
       int idUtilisateur) async {
